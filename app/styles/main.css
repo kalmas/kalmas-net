@@ -1,28 +1,78 @@
-/* Space out content a bit */
+@import url(http://fonts.googleapis.com/css?family=Merriweather:400,700,400italic);
+
 body {
   padding-top: 20px;
   padding-bottom: 20px;
 }
 
-/* Everything but the jumbotron gets side spacing for mobile first views */
-.header,
-.marketing,
-.footer {
+.masthead,
+.footer,
+.content {
   padding-left: 15px;
   padding-right: 15px;
 }
 
-/* Custom page header */
-.header {
-  border-bottom: 1px solid #e5e5e5;
-}
-/* Make the masthead heading the same height as the navigation */
-.header h3 {
+.masthead h2 {
   margin-top: 0;
   margin-bottom: 0;
-  line-height: 40px;
-  padding-bottom: 19px;
+  line-height: 60px;
+  font-size: 78px;
+  font-family: 'Merriweather', serif;
+  border-bottom: solid 1px #999999; 
 }
+
+.masthead h2 .tld {
+  font-size: 45px;
+}
+
+.nav-masthead li {
+  width:120px;
+}
+
+.nav-masthead a {
+  color: #ffffff; 
+  background-color: #DDE322;
+  font-size:20px;
+} 
+
+.nav-masthead li.active a{
+  color: #ffffff; 
+  background-color: #999999; 
+}
+
+.nav-masthead li a:hover{
+  color: #ffffff; 
+  background-color: #999999; 
+}
+.nav-masthead li.active a:hover{
+  color: #ffffff; 
+  background-color: #999999; 
+} 
+
+.content {
+  font-family: 'Merriweather', serif;
+  padding-left: 25px;
+  padding-right: 25px;
+}
+
+.heading h1 {
+  font-family: 'Merriweather', serif;
+  padding-left: 25px;
+  padding-right: 25px;
+}
+.heading h3, .heading h4 {
+  font-family: 'Merriweather', serif;
+  text-align: center;  
+}
+.desk, .date {
+  font-style: italic;
+}
+
+h1 {
+  font-family: 'Merriweather', serif;
+  font-size: 50px;
+}
+
 
 /* Custom page footer */
 .footer {
@@ -41,39 +91,28 @@ body {
   margin: 30px 0;
 }
 
-/* Main marketing message and sign up button */
-.jumbotron {
-  text-align: center;
-  border-bottom: 1px solid #e5e5e5;
-}
-.jumbotron .btn {
-  font-size: 21px;
-  padding: 14px 24px;
-}
-
-/* Supporting marketing content */
-.marketing {
-  margin: 40px 0;
-}
-.marketing p + h4 {
-  margin-top: 28px;
-}
 
 /* Responsive: Portrait tablets and up */
 @media screen and (min-width: 768px) {
   /* Remove the padding we set earlier */
-  .header,
-  .marketing,
+  .masthead,
   .footer {
     padding-left: 0;
     padding-right: 0;
   }
   /* Space out the masthead */
-  .header {
-    margin-bottom: 30px;
+  .masthead {
+    margin-bottom: 10px;
   }
   /* Remove the bottom border on the jumbotron for visual effect */
   .jumbotron {
     border-bottom: 0;
   }
+}
+
+
+p:first-child:first-letter {
+  font-size: 40px;
+  padding-right: 3px;
+  float: left;
 }
