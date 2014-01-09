@@ -12,6 +12,10 @@ angular.module('kalmasNetApp', [
         templateUrl: 'partials/main',
         controller: 'MainCtrl'
       })
+      .when('/blog', {
+        templateUrl: 'partials/blog',
+        controller: 'BlogCtrl'
+      })
       .otherwise({
         redirectTo: '/'
       });
