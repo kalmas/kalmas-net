@@ -5,14 +5,17 @@ angular.module('kalmasNetApp')
 
     $scope.menu = [{
       'title': 'Home',
-      'link': '/'
+      'link': '/',
+      'pattern': /^\/$/
     },
     {
       'title': 'Blog',
-      'link': '/blog'
+      'link': '/blog',
+      'pattern': /^\/blog.*$/
+
     }];
 
-    $scope.isActive = function(route) {
-      return route === $location.path();
+    $scope.isActive = function(pattern) {
+      return $location.path().match(pattern);
     };
   });

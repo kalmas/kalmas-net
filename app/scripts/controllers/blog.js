@@ -1,6 +1,7 @@
 'use strict';
 
-angular.module('kalmasNetApp')
-  .controller('BlogCtrl', function ($scope, $http, $location) {
+angular.module('kalmasNetApp.controllers', [])
+    .controller('BlogCtrl', ['$scope', '$routeParams', '$location', 'BlogPosts'
+              , function ($scope, $routeParams, $location, BlogPosts) {
 
-  });
+}]);
