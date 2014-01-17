@@ -116,3 +116,21 @@ p:first-child:first-letter {
   padding-right: 3px;
   float: left;
 }
+
+.nav-blog button{
+  width: 150px;
+}
+
+.dropdown-menu li {
+  text-align: left;
+}
+
+.blog-list-date {
+  color: #999999;
+  font-size: smaller;
+}
+
+.blog-list-title {
+  font-weight: bold;
+}
+

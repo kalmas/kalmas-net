@@ -1,3 +1,25 @@
+<div class="text-center">
+  <div class="btn-group nav-blog">
+    <button type="button" class="btn btn-default">&larr; Previous</button>
+    <div class="btn-group">
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+            More  <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" role="menu">
+            <li ng-repeat="item in toc">
+                <a href="#">
+                    <div class="blog-list-date">Nov 14, 1986</div>
+                    <div class="blog-list-title">The Title</div>
+                </a>
+            </li>
+            <li class="divider"></li>
+        </ul>
+    </div>
+    <button type="button" class="active btn btn-default">Next &rarr;</button>
+
+  </div>
+</div>
+
 <div class="heading">
   <h3 class="date text-muted">{{ date | date:'fullDate' }}</h3>
   <h4 class="desk text-muted">The {{desk}} Desk</h4>

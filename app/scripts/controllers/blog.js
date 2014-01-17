@@ -10,11 +10,16 @@ angular.module('kalmasNetApp.controllers', [])
     }
 
     BlogPosts.getPost(slug).then(function(post) {
-      $scope.title = post.title;
       $scope.date = post.date;
       $scope.desk = post.desk;
+      $scope.title = post.title;
       $scope.contentPath = post.contentPath;
     });
+
+    // BlogPosts.getToc().then(function(toc) {
+    //   $scope.toc = toc;
+    //   console.log(toc);
+    // });
     
 
 
