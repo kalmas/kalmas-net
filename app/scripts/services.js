@@ -3,17 +3,19 @@
 angular.module('kalmasNetApp.services', [])
     .factory("BlogPosts", ['$http', '$q', function($http, $q) {
   var path = 'content/'
-      , metaFormat = '.json'
       , contentFormat = '.html'
       , tocFile = 'toc.json';
 
-  var findPost = function(criteria, toc) {
+  var findPostWith = function(criteria, posts) {
     var key = Object.keys(criteria)[0]
-      , value = criteria[key];
+      , value = criteria[key]
+      , post = undefined;
 
-    for (var i = 0; i < toc.length; i++) {
-      if(toc[i][key] === value){
-        return toc[i];
+    for (var i = 0; i < posts.length; i++) {
+      if(posts[i][key] === value){
+        post = posts[i];
+        post.index = i; 
+        return post;
       }
     }
   };
@@ -29,29 +31,63 @@ angular.module('kalmasNetApp.services', [])
     return deferred.promise;
   };
 
-  var getPostMetadata = function(slug) {
+  var lookupSlug = function(slug) {
     var deferred = $q.defer();
 
     getToc().then(function(toc) {
-      var post = findPost({"slug": slug}, toc.content);
-      post.contentPath = path + slug + contentFormat;
+      var post = findPostWith({"slug": slug}, toc.content);
       deferred.resolve(post);
     });
 
     return deferred.promise;
   };  
 
+  var lookupIndex = function(index) {
+    var deferred = $q.defer();
+
+    getToc().then(function(toc) {
+      var post = toc[index];
+      deferred.resolve(post);
+    });
+
+    return deferred.promise;
+  }
+
   return {
-    getPost: function(slug) {
+    getPostBySlug: function(slug) {
       var deferred = $q.defer();
 
-      getPostMetadata(slug).then(function(metadata) {
-        deferred.resolve(metadata);
+      lookupSlug(slug).then(function(post) {
+        if(post !== undefined) {
+          post.contentPath = path + slug + contentFormat;
+        }
+        deferred.resolve(post);
       });
 
       return deferred.promise;
     },
-    getToc: function(slug) {}
+    getPostByIndex: function(index){
+      var deferred = $q.defer();
+
+      lookupIndex(index).then(function(post) {
+        if(post !== undefined){
+          post.contentPath = path + post.slug + contentFormat;
+          post.index = index;
+        }
+        deferred.resolve(post);
+      });
+
+      return deferred.promise;
+    },
+    getPostsList: function() {
+      var deferred = $q.defer();
+
+      getToc().then(function(toc) {
+        deferred.resolve(toc.content);
+      });
+
+      return deferred.promise;
+    }
   };
     
 }]);

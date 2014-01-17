@@ -5,22 +5,21 @@ angular.module('kalmasNetApp.controllers', [])
               , function ($scope, $routeParams, $location, BlogPosts) {
 
     var slug = $routeParams.slug;
-    if(slug === undefined){
-      slug = 'scramble-squares';
-    }
 
-    BlogPosts.getPost(slug).then(function(post) {
-      $scope.date = post.date;
-      $scope.desk = post.desk;
-      $scope.title = post.title;
-      $scope.contentPath = post.contentPath;
+    // Get a list of recent posts
+    BlogPosts.getPostsList().then(function(posts) {
+      return posts;
+    }).then(function(posts) {
+      // Then get this post
+      BlogPosts.getPostBySlug(slug).then(function(post) {
+        if(post === undefined){
+          $location.path('/blog/' + posts[0].slug);
+        } else {
+          $scope.post = post;
+          $scope.posts = posts;
+        }
+      });
     });
-
-    // BlogPosts.getToc().then(function(toc) {
-    //   $scope.toc = toc;
-    //   console.log(toc);
-    // });
-    
 
 
 }]);
