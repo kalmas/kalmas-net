@@ -6,19 +6,15 @@ angular.module('kalmasNetApp.controllers', [])
 
     var slug = $routeParams.slug;
 
-    // Get a list of recent posts
-    BlogPosts.getPostsList().then(function(posts) {
-      return posts;
-    }).then(function(posts) {
-      // Then get this post
-      BlogPosts.getPostBySlug(slug).then(function(post) {
-        if(post === undefined){
-          $location.path('/blog/' + posts[0].slug);
-        } else {
-          $scope.post = post;
-          $scope.posts = posts;
-        }
-      });
+    BlogPosts.getPostBySlug(slug).then(function(post) {
+      if(post === undefined){
+        // Couldn't find that slug, redirect to most recent post
+        BlogPosts.getNewestPost().then(function(post) {
+          $location.path('/blog/' + post.slug);
+        });
+      } else {
+        $scope.post = post;
+      }
     });
 
 
