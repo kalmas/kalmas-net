@@ -29,10 +29,10 @@
     <div class="masthead" ng-controller="NavCtrl">
       <ul class="nav nav-pills pull-right nav-masthead">
         <li ng-repeat="item in menu" ng-class="{active: isActive(item.pattern)}">
-          <a class="btn" ng-href="{{item.link}}">{{item.title}}</a>
+          <a class="btn" ng-class="{active: isActive(item.pattern)}" ng-href="{{item.link}}">{{item.title}}</a>
         </li>
       </ul>
-      <h2 class="text-muted">ipsum<span class="tld">.net<span></h2>
+      <h2 class="text-muted">kalmas<span class="tld">.net<span></h2>
     </div>
     <!-- Add your site or application content here -->
     <div class="main" ng-view=""></div>
