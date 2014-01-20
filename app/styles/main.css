@@ -121,6 +121,10 @@ p:first-child:first-letter {
   width: 150px;
 }
 
+.nav-blog a{
+  width: 150px;
+}
+
 .dropdown-menu li {
   text-align: left;
 }

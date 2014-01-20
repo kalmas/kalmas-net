@@ -111,6 +111,12 @@ angular.module('kalmasNetApp.services', [])
     },
     getPostsList: function() {
       return getToc();
+    },
+    getNextPost: function(post) {
+      return getPost({"index": post.index - 1});
+    },
+    getPrevPost: function(post) {
+      return getPost({"index": post.index + 1});
     }
   };
     

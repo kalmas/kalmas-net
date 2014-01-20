@@ -1,6 +1,6 @@
 <div class="text-center">
   <div class="btn-group nav-blog">
-    <button type="button" class="btn btn-default">&larr; Previous</button>
+    <a ng-href="{{ 'blog/' + prev.slug }}" role="button" class="btn btn-default" ng-class="{active: (prev === undefined)}">&larr; Previous</a>
     <div class="btn-group">
         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
             More  <span class="caret"></span>
@@ -15,7 +15,7 @@
             <li class="divider"></li>
         </ul>
     </div>
-    <button type="button" class="active btn btn-default">Next &rarr;</button>
+    <a ng-href="{{ 'blog/' + next.slug }}" role="button" class="btn btn-default" ng-class="{active: (next === undefined)}">Next &rarr;</a>
 
   </div>
 </div>

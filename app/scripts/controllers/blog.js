@@ -14,8 +14,16 @@ angular.module('kalmasNetApp.controllers', [])
         });
       } else {
         $scope.post = post;
+        return post;
       }
+    }).then(function(post) {
+      BlogPosts.getNextPost(post).then(function(post) {
+        $scope.next = post;
+      });
+      BlogPosts.getPrevPost(post).then(function(post) {
+        $scope.prev = post;
+        console.log(post);
+      });
     });
-
 
 }]);
