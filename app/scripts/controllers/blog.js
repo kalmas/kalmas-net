@@ -26,4 +26,8 @@ angular.module('kalmasNetApp.controllers', [])
       });
     });
 
+    BlogPosts.getPostsList().then(function(posts) {
+      $scope.posts = posts;
+    });
+
 }]);
