@@ -2,7 +2,7 @@
 
 angular.module('kalmasNetApp.services', [])
     .factory("BlogPosts", ['$http', '$q', function($http, $q) {
-  var path = 'content/'
+  var path = 'blog/content/'
       , contentFormat = '.html'
       , tocFile = 'toc.json'
       , toc = undefined;
