@@ -1,5 +1,18 @@
 @import url(http://fonts.googleapis.com/css?family=Merriweather:400,700,400italic);
 
+/* Reusable classes */
+.firstCaps:first-letter {
+  font:70px/70px Merriweather;
+  padding-right:3px;
+  float:left;
+}
+
+/* Markdown rules */
+.content blockquote>:first-child:first-letter {
+  font:35px/35px Merriweather;
+  padding-right: 2px;
+}
+
 body {
   padding-top: 20px;
   padding-bottom: 20px;
@@ -15,7 +28,7 @@ body {
 .masthead h2 {
   margin-top: 0;
   margin-bottom: 0;
-  line-height: 60px;
+  line-height: 1;
   font-size: 78px;
   font-family: 'Merriweather', serif;
   border-bottom: solid 1px #999999; 
@@ -108,13 +121,6 @@ h1 {
   .jumbotron {
     border-bottom: 0;
   }
-}
-
-
-p:first-child:first-letter {
-  font-size: 40px;
-  padding-right: 3px;
-  float: left;
 }
 
 .nav-blog button{
