@@ -1,8 +1,8 @@
 'use strict';
 
-angular.module('kalmasNetApp.controllers', [])
-    .controller('BlogCtrl', ['$scope', '$routeParams', '$location', 'BlogPosts'
-              , function ($scope, $routeParams, $location, BlogPosts) {
+angular.module('kalmasNetApp.controllers')
+    .controller('BlogCtrl', ['$scope', '$routeParams', '$location', 'Page', 'BlogPosts'
+              , function ($scope, $routeParams, $location, Page, BlogPosts) {
 
     var slug = $routeParams.slug;
 
@@ -14,6 +14,7 @@ angular.module('kalmasNetApp.controllers', [])
         });
       } else {
         $scope.post = post;
+        Page.setPageName(post.title);
         return post;
       }
     }).then(function(post) {
@@ -22,7 +23,6 @@ angular.module('kalmasNetApp.controllers', [])
       });
       BlogPosts.getPrevPost(post).then(function(post) {
         $scope.prev = post;
-        console.log(post);
       });
     });
 

@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('kalmasNetApp.controllers', [])
+angular.module('kalmasNetApp.controllers')
     .controller('IndexCtrl', ['$scope'
               , function ($scope) {
 

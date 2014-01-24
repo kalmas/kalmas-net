@@ -25,3 +25,5 @@ angular.module('kalmasNetApp', [
       });
     $locationProvider.html5Mode(true);
   });
+
+angular.module('kalmasNetApp.controllers', []);

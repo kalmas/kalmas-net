@@ -1,7 +1,12 @@
 'use strict';
 
-angular.module('kalmasNetApp.services', [])
-    .factory("BlogPosts", ['$http', '$q', function($http, $q) {
+var services = angular.module('kalmasNetApp.services', []);
+
+/**
+ * Blog Posts Service
+ * Retrieves post content and meta data
+ */
+services.factory('BlogPosts', ['$http', '$q', function($http, $q) {
   var path = 'blog/content/'
       , contentFormat = '.html'
       , tocFile = 'toc.json'
@@ -121,3 +126,22 @@ angular.module('kalmasNetApp.services', [])
   };
     
 }]);
+
+
+services.factory('Page', function() {
+  var siteName = 'kalmas.net'
+    , pageName = undefined
+    , title = siteName;
+
+  return {
+    setPageName: function(name) {
+      pageName = name; 
+    },
+    getTitle: function() {
+      if(pageName == undefined) {
+        return siteName;
+      }
+      return pageName + ' | ' + siteName;
+    }
+  }
+});
