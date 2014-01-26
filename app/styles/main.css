@@ -144,3 +144,18 @@ h1 {
   font-weight: bold;
 }
 
+
+.portrait {
+  width: 35%;
+  float: left;
+  margin: 0 10px 10px 0;
+}
+
+.skills {
+  font-size: 20px;
+}
+
+
+
+
+

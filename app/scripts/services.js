@@ -128,6 +128,10 @@ services.factory('BlogPosts', ['$http', '$q', function($http, $q) {
 }]);
 
 
+/**
+ * Page Service
+ * Service for sharing data about current page between controllers
+ */
 services.factory('Page', function() {
   var siteName = 'kalmas.net'
     , pageName = undefined
@@ -145,3 +149,33 @@ services.factory('Page', function() {
     }
   }
 });
+
+
+/**
+ * About Service
+ */
+services.factory('About', ['$http', '$q', function($http, $q) {
+  var about = undefined;
+
+  var fetchAbout = function() {
+    var deferred = $q.defer()
+      , aboutPath = 'blog/content/about.json';
+    
+    if(about !== undefined) {
+      deferred.resolve(about);
+    } else {
+      $http.get(aboutPath).then(function(response) {
+        about = response.data;
+        deferred.resolve(about);
+      });
+    }
+
+    return deferred.promise;
+  };
+
+  return {
+    getAbout: function() {
+      return fetchAbout();
+    }
+  };
+}]);

@@ -1,6 +1,7 @@
 'use strict';
 
 angular.module('kalmasNetApp', [
+  'ui.bootstrap',
   'ngResource',
   'ngRoute',
   'kalmasNetApp.controllers',
