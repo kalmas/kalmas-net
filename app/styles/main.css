@@ -44,7 +44,7 @@ body {
 
 .nav-masthead a {
   color: #ffffff; 
-  background-color: #DDE322;
+  background-color: #E5F252;
   font-size:20px;
 } 
 
@@ -153,6 +153,14 @@ h1 {
 
 .skills {
   font-size: 20px;
+}
+
+h4.panel-title {
+  margin: 0px;
+}
+
+.label {
+  margin: 3px;
 }
 
 

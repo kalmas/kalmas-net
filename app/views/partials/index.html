@@ -8,6 +8,7 @@
   <accordion close-others="true">
     <accordion-group ng-repeat="item in projects" heading="{{ item.name }}" is-open="$first">
       {{ item.about }}
+      {{ item.url }}
     </accordion-group>
   </accordion>
 	<h3>Stuff I know about:</h3>
@@ -21,6 +22,4 @@
 			<span class="label label-primary">New At It</span>
 		</span>
 	</div>
-
-
 </div>
