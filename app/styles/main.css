@@ -159,4 +159,7 @@ h4.panel-title {
   margin: 0px;
 }
 
-
+.dropdown-menu > li > a {
+  white-space: normal;
+  width: 250px;
+}
