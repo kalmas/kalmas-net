@@ -1,10 +1,10 @@
 <div class="content">
-	<div class="bio">
-		<img src="/blog/content/img/me.jpg" class="portrait" />
+  <div class="bio">
+    <img src="/blog/content/img/me.jpg" class="portrait" />
 		<p>{{ bio }}</p>
 	</div>
-	<h3>Projects</h3>
 
+	<h3>Projects</h3>
   <accordion close-others="true">
     <accordion-group ng-repeat="item in projects" heading="{{ item.name }}" is-open="$first">
       <p>{{ item.about }}</p>
@@ -13,15 +13,16 @@
       <p>Post: <a ng-href="item.url" target="_blank">{{ item.post }}</a></p>
     </accordion-group>
   </accordion>
-	<h3>Stuff I know about:</h3>
+  
+<!-- 	<h3>Stuff I know about:</h3>
 	<div class="skills">
-		<div class="list well">
+ 		<div class="label-list well">
 			<span class="label label-primary" ng-repeat="item in skills">{{ item.name }}</span>
 		</div>
-		<div class="key">
+		<div class="keys">
 			<span class="label label-primary">Good At It</span>
 			<span class="label label-primary">Okay At It</span>
 			<span class="label label-primary">New At It</span>
-		</span>
-	</div>
+		</div>
+	</div> -->
 </div>
