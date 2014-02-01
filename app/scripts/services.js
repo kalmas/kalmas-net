@@ -7,24 +7,24 @@ var services = angular.module('kalmasNetApp.services', []);
  * Retrieves post content and meta data
  */
 services.factory('BlogPosts', ['$http', '$q', function($http, $q) {
-  var path = 'blog/content/'
-      , contentFormat = '.html'
-      , tocFile = 'toc.json'
-      , toc = undefined;
+  var path = 'blog/content/',
+    contentFormat = '.html',
+    tocFile = 'toc.json',
+    toc;
 
   /**
    * Given a criteria obj, return the first post obj 
    * that matches
    */
   var findPostWith = function(criteria, posts) {
-    var key = Object.keys(criteria)[0]
-      , value = criteria[key]
-      , post = undefined;
+    var key = Object.keys(criteria)[0],
+      value = criteria[key],
+      post;
 
     for (var i = 0; i < posts.length; i++) {
       if(posts[i][key] === value){
         post = posts[i];
-        post.index = i; 
+        post.index = i;
         return post;
       }
     }
@@ -35,8 +35,8 @@ services.factory('BlogPosts', ['$http', '$q', function($http, $q) {
    * Returns promise
    */
   var getToc = function() {
-    var deferred = $q.defer()
-      , tocPath = path + tocFile;
+    var deferred = $q.defer(),
+    tocPath = path + tocFile;
     
     if(toc !== undefined) {
       deferred.resolve(toc);
@@ -58,12 +58,12 @@ services.factory('BlogPosts', ['$http', '$q', function($http, $q) {
     var deferred = $q.defer();
 
     getToc().then(function(toc) {
-      var post = findPostWith({"slug": slug}, toc);
+      var post = findPostWith({'slug': slug}, toc);
       deferred.resolve(post);
     });
 
     return deferred.promise;
-  };  
+  };
 
   /**
    * Lookup the post data associated with given index number
@@ -88,14 +88,14 @@ services.factory('BlogPosts', ['$http', '$q', function($http, $q) {
    * Returns promise
    */
   var getPost = function(criteria) {
-    var deferred = $q.defer()
-      , key = Object.keys(criteria)[0]
-      , value = criteria[key]
-      , lookupMethod = lookupSlug;
+    var deferred = $q.defer(),
+      key = Object.keys(criteria)[0],
+      value = criteria[key],
+      lookupMethod = lookupSlug;
 
     if(key === 'index') {
       lookupMethod = lookupIndex;
-    }  
+    }
 
     lookupMethod(value).then(function(post) {
       if(post !== undefined) {
@@ -109,19 +109,19 @@ services.factory('BlogPosts', ['$http', '$q', function($http, $q) {
 
   return {
     getPostBySlug: function(slug) {
-      return getPost({"slug": slug});
+      return getPost({'slug': slug});
     },
     getNewestPost: function() {
-      return getPost({"index": 0});
+      return getPost({'index': 0});
     },
     getPostsList: function() {
       return getToc();
     },
     getNextPost: function(post) {
-      return getPost({"index": post.index - 1});
+      return getPost({'index': post.index - 1});
     },
     getPrevPost: function(post) {
-      return getPost({"index": post.index + 1});
+      return getPost({'index': post.index + 1});
     }
   };
     
@@ -133,21 +133,20 @@ services.factory('BlogPosts', ['$http', '$q', function($http, $q) {
  * Service for sharing data about current page between controllers
  */
 services.factory('Page', function() {
-  var siteName = 'kalmas.net'
-    , pageName = undefined
-    , title = siteName;
+  var siteName = 'kalmas.net',
+    pageName;
 
   return {
     setPageName: function(name) {
-      pageName = name; 
+      pageName = name;
     },
     getTitle: function() {
-      if(pageName == undefined) {
+      if(pageName === undefined) {
         return siteName;
       }
       return pageName + ' | ' + siteName;
     }
-  }
+  };
 });
 
 
@@ -155,11 +154,11 @@ services.factory('Page', function() {
  * About Service
  */
 services.factory('About', ['$http', '$q', function($http, $q) {
-  var about = undefined;
+  var about;
 
   var fetchAbout = function() {
-    var deferred = $q.defer()
-      , aboutPath = 'blog/content/about.json';
+    var deferred = $q.defer(),
+      aboutPath = 'blog/content/about.json';
     
     if(about !== undefined) {
       deferred.resolve(about);

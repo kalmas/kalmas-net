@@ -10,11 +10,11 @@ var app = express();
 require('./lib/config/express')(app);
 
 // Controllers
-var api = require('./lib/controllers/api'),
-    index = require('./lib/controllers');
+// var api = require('./lib/controllers/api'),
+var index = require('./lib/controllers');
 
 // Server Routes
-app.get('/api/awesomeThings', api.awesomeThings);
+// app.get('/api/awesomeThings', api.awesomeThings);
 
 // Angular Routes
 app.get('/partials/*', index.partials);

@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('kalmasNetApp.controllers')
-    .controller('BlogCtrl', ['$scope', '$routeParams', '$location', 'Page', 'BlogPosts'
-              , function ($scope, $routeParams, $location, Page, BlogPosts) {
+  .controller('BlogCtrl', ['$scope', '$routeParams', '$location', 'Page', 'BlogPosts',
+  function ($scope, $routeParams, $location, Page, BlogPosts) {
 
     var slug = $routeParams.slug;
 
@@ -29,5 +29,4 @@ angular.module('kalmasNetApp.controllers')
     BlogPosts.getPostsList().then(function(posts) {
       $scope.posts = posts;
     });
-
-}]);
+  }]);
