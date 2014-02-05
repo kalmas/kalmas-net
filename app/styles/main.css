@@ -161,3 +161,25 @@ h4.panel-title {
   white-space: normal;
   width: 250px;
 }
+
+.monospace {
+  font-family: "Courier New", Courier, monospace;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+a.label-interest {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background-color: rgb(226, 226, 252);
+  font-size: 85%;
+  padding: .2em .6em .2em;
+  display: inline;
+  font-weight: bold;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: .25em;
+}
