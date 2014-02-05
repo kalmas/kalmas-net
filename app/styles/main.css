@@ -29,7 +29,12 @@ body {
   line-height: 1;
   font-size: 78px;
   font-family: 'Merriweather', serif;
-  border-bottom: solid 1px #999999; 
+  border-bottom: solid 1px #999999;
+  text-decoration: none;
+}
+
+.masthead a:hover{
+  text-decoration: none;
 }
 
 .masthead h2 .tld {
@@ -42,13 +47,27 @@ body {
 
 .nav-masthead a {
   color: #ffffff; 
-  background-color: #E5F252;
   font-size:20px;
+  border: 1px solid #FACD1B;
+  margin: 0 7px 0 0;
+  background-image: -webkit-gradient(
+    linear,
+    left top,
+    left bottom,
+    color-stop(0.05, #FCFC29),
+    color-stop(1, #FACD1B)
+  );
+  background-image: -o-linear-gradient(bottom, #FCFC29 5%, #FACD1B 100%);
+  background-image: -moz-linear-gradient(bottom, #FCFC29 5%, #FACD1B 100%);
+  background-image: -webkit-linear-gradient(bottom, #FCFC29 5%, #FACD1B 100%);
+  background-image: -ms-linear-gradient(bottom, #FCFC29 5%, #FACD1B 100%);
+  background-image: linear-gradient(to bottom, #FCFC29 5%, #FACD1B 100%);
 } 
 
 .nav-masthead li.active a{
   color: #ffffff; 
-  background-color: #999999; 
+  background-color: #999999;
+  border: none;
 }
 
 .nav-masthead li a:hover{
@@ -83,7 +102,6 @@ h1 {
   font-family: 'Merriweather', serif;
   font-size: 50px;
 }
-
 
 /* Custom page footer */
 .footer {
@@ -141,7 +159,6 @@ h1 {
 .blog-list-title {
   font-weight: bold;
 }
-
 
 .portrait {
   width: 35%;
