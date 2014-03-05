@@ -24,7 +24,7 @@ angular.module('kalmasNetApp', [
       .otherwise({
         redirectTo: '/'
       });
-    $locationProvider.html5Mode(true);
+    $locationProvider.html5Mode(true).hashPrefix('!');
   });
 
 angular.module('kalmasNetApp.controllers', []);
