@@ -1,6 +1,11 @@
 var page = require('webpage').create(),
   system = require('system'),
-  url = system.args[1] || '';
+  url = system.args[1] || '',
+  scriptTagRegex = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
+
+var stripScriptTags = function (html) {
+  return html.replace(scriptTagRegex, '');
+}
 
 page.open(url, function(success) {
   setTimeout(function () {
@@ -8,7 +13,7 @@ page.open(url, function(success) {
       return document.getElementsByTagName('html')[0].outerHTML;
     });
       
-    console.log(html);
+    console.log(stripScriptTags(html));
     phantom.exit();
   }, 1000);
 });

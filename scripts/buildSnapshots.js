@@ -11,9 +11,9 @@ var exec = require('child_process').exec,
   ];
 
 var saveMarkup = function (url, file) {
-  exec('phantomjs takeSnapshot.js ' + url, function (error, stdout, stderr) {
+  exec('phantomjs ' + __dirname + '/takeSnapshot.js ' + url, function (error, stdout, stderr) {
     var wstream = fs.createWriteStream(file);
-	wstream.write(stdout);
+	  wstream.write(stdout);
   });
 };
 
