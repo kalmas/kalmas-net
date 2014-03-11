@@ -5,7 +5,7 @@ var exec = require('child_process').exec,
   snapshotsDir = path.join(contentDir, 'snapshots'),
   blogTocFile = path.join(contentDir, 'toc.json'),
   blogToc = JSON.parse(fs.readFileSync(blogTocFile)),
-  host = 'http://localhost:9000'
+  host = 'http://localhost:3000'
   staticPages = [
   	{ path: '/', file: 'index.html'}
   ];

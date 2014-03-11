@@ -1,10 +1,13 @@
 var page = require('webpage').create(),
   system = require('system'),
   url = system.args[1] || '',
-  scriptTagRegex = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
+  scriptTagRegex = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+  localhost = 'localhost:3000',
+  realhost = 'kalmas.net';
 
-var stripScriptTags = function (html) {
-  return html.replace(scriptTagRegex, '');
+var stripIt = function (html) {
+  var stripped = html.replace(localhost, realhost);
+  return stripped.replace(scriptTagRegex, '');
 }
 
 page.open(url, function(success) {
@@ -13,7 +16,7 @@ page.open(url, function(success) {
       return document.getElementsByTagName('html')[0].outerHTML;
     });
       
-    console.log(stripScriptTags(html));
+    console.log(stripIt(html));
     phantom.exit();
   }, 1000);
 });
