@@ -10,7 +10,6 @@ var app = express();
 require('./lib/config/express')(app);
 
 // Controllers
-// var api = require('./lib/controllers/api'),
 var index = require('./lib/controllers');
 
 // Server Routes
