@@ -1,8 +1,13 @@
 'use strict';
 
 angular.module('kalmasNetApp.controllers')
-  .controller('IndexCtrl', ['$scope', 'About',
-  function ($scope, About) {
+  .controller('IndexCtrl', ['$scope', 'About', 'Page',
+  function ($scope, About, Page) {
+
+    Page.setTitle(undefined);
+    Page.setDesc('Hi, my name is Kyle and my username is kalmas. ' +
+      'This is my blog. I\'m a web developer by trade with a hobbyist\'s ' +
+      'interest in anything programming related.');
 
     About.getAbout().then(function(about) {
       $scope.bio = about.bio;

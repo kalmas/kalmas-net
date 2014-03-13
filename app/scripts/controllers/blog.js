@@ -14,7 +14,8 @@ angular.module('kalmasNetApp.controllers')
         });
       } else {
         $scope.post = post;
-        Page.setPageName(post.title);
+        Page.setTitle(post.title);
+        Page.setDesc(post.desc);
         return post;
       }
     }).then(function(post) {

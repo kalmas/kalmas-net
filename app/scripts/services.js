@@ -134,10 +134,11 @@ services.factory('BlogPosts', ['$http', '$q', function($http, $q) {
  */
 services.factory('Page', function() {
   var siteName = 'kalmas.net',
-    pageName;
+    pageName,
+    pageDesc = 'so cool';
 
   return {
-    setPageName: function(name) {
+    setTitle: function(name) {
       pageName = name;
     },
     getTitle: function() {
@@ -145,6 +146,12 @@ services.factory('Page', function() {
         return siteName;
       }
       return pageName + ' | ' + siteName;
+    },
+    setDesc: function (desc) {
+      pageDesc = desc;
+    },
+    getDesc: function () {
+      return pageDesc;
     }
   };
 });
