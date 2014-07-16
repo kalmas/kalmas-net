@@ -1,19 +1,14 @@
 'use strict';
 
 // Module dependencies.
-var express = require('express');
-
-var app = express();
-
+var express = require('express'),
+  app = express();
 
 // Express Configuration
 require('./lib/config/express')(app);
 
 // Controllers
 var index = require('./lib/controllers');
-
-// Server Routes
-// app.get('/api/awesomeThings', api.awesomeThings);
 
 // Angular Routes
 app.get('/partials/*', index.partials);

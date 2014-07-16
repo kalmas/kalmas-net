@@ -115,9 +115,8 @@ module.exports = function (grunt) {
           dot: true,
           src: [
             '.tmp',
-            '<%= yeoman.views %>/*',
-            '<%= yeoman.dist %>/*',
-            '!<%= yeoman.dist %>/.git*'
+            '<%= yeoman.views %>',
+            '<%= yeoman.dist %>'
           ]
         }]
       },
@@ -125,9 +124,7 @@ module.exports = function (grunt) {
         files: [{
           dot: true,
           src: [
-            'heroku/*',
-            '!heroku/.git*',
-            '!heroku/Procfile'
+            'heroku'
           ]
         }]
       },

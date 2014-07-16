@@ -3,7 +3,11 @@ node_modules
 .sass-cache
 app/bower_components
 heroku
-.DS_Store
+
 public/
+views/
+
+.idea
+.DS_Store
 
 app/blog
