@@ -18,7 +18,9 @@ module.exports = function (grunt) {
   // Define the configuration for all the tasks
   grunt.initConfig({
 
-    // Project settings
+    /*
+     * project settings
+     */
     yeoman: {
       // configurable paths
       app: require('./bower.json').appPath || 'app',
@@ -91,7 +93,11 @@ module.exports = function (grunt) {
       }
     },
 
-    // Make sure code styles are up to par and there are no obvious mistakes
+    /*
+     * jshint
+     *
+     * Make sure code styles are up to par and there are no obvious mistakes
+     */
     jshint: {
       options: {
         jshintrc: '.jshintrc',
@@ -108,7 +114,11 @@ module.exports = function (grunt) {
       }
     },
 
-    // Empties folders to start fresh
+    /*
+     * clean
+     *
+     * Deletes dirs created by build
+     */
     clean: {
       dist: {
         files: [{
@@ -120,18 +130,14 @@ module.exports = function (grunt) {
           ]
         }]
       },
-      heroku: {
-        files: [{
-          dot: true,
-          src: [
-            'heroku'
-          ]
-        }]
-      },
       server: '.tmp'
     },
 
-    // Add vendor prefixed styles
+    /*
+     * autoprefixer
+     *
+     * Add vendor prefixed styles
+     */
     autoprefixer: {
       options: {
         browsers: ['last 1 version']
@@ -146,17 +152,23 @@ module.exports = function (grunt) {
       }
     },
 
-    // Automatically inject Bower components into the app
+    /*
+     * bower-install
+     *
+     * Automatically inject Bower components into the app
+     */
     'bower-install': {
       app: {
         html: '<%= yeoman.app %>/views/index.html',
         ignorePath: '<%= yeoman.app %>/'
       }
     },
-    
-    
 
-    // Renames files for browser caching purposes
+    /*
+     * rev
+     *
+     * Renames files for browser caching purposes
+     */
     rev: {
       dist: {
         files: {
@@ -170,9 +182,13 @@ module.exports = function (grunt) {
       }
     },
 
-    // Reads HTML for usemin blocks to enable smart builds that automatically
-    // concat, minify and revision files. Creates configurations in memory so
-    // additional tasks can operate on them
+    /*
+     * useminPrepare
+     *
+     * Reads HTML for usemin blocks to enable smart builds that automatically
+     * concat, minify and revision files. Creates configurations in memory so
+     * additional tasks can operate on them
+     */
     useminPrepare: {
       html: ['<%= yeoman.app %>/<%= yeoman.views %>/index.html',
              '<%= yeoman.app %>/<%= yeoman.views %>/index.jade'],
@@ -181,7 +197,10 @@ module.exports = function (grunt) {
       }
     },
 
-    // Performs rewrites based on rev and the useminPrepare configuration
+    /*
+     * usemin
+     * Performs rewrites based on rev and the useminPrepare configuration
+     */
     usemin: {
       html: ['<%= yeoman.views %>/{,*/}*.html',
              '<%= yeoman.views %>/{,*/}*.jade'],
@@ -191,7 +210,11 @@ module.exports = function (grunt) {
       }
     },
 
-    // The following *-min tasks produce minified files in the dist folder
+    /*
+     * min
+     *
+     * The following *-min tasks produce minified files in the dist folder
+     */
     imagemin: {
       dist: {
         files: [{
@@ -229,8 +252,12 @@ module.exports = function (grunt) {
       }
     },
 
-    // Allow the use of non-minsafe AngularJS files. Automatically makes it
-    // minsafe compatible so Uglify does not destroy the ng references
+    /*
+     * ngmin
+     *
+     * Allow the use of non-minsafe AngularJS files. Automatically makes it
+     * minsafe compatible so Uglify does not destroy the ng references
+     */
     ngmin: {
       dist: {
         files: [{
@@ -242,14 +269,22 @@ module.exports = function (grunt) {
       }
     },
 
-    // Replace Google CDN references
+    /*
+     * cdnify
+     *
+     * Replace Google CDN references
+     */
     cdnify: {
       dist: {
         html: ['<%= yeoman.views %>/*.html']
       }
     },
 
-    // Copies remaining files to places other tasks can use
+    /*
+     * copy
+     *
+     * Copies remaining files to places other tasks can use
+     */
     copy: {
       dist: {
         files: [{
@@ -259,10 +294,11 @@ module.exports = function (grunt) {
           dest: '<%= yeoman.dist %>',
           src: [
             '*.{ico,png,txt}',
-            '.htaccess',
             'bower_components/**/*',
             'images/{,*/}*.{webp}',
-            'fonts/**/*'
+            'fonts/**/*',
+            'blog/**/*',
+            '!blog/content/.git'
           ]
         }, {
           expand: true,
@@ -277,25 +313,6 @@ module.exports = function (grunt) {
           src: ['generated/*']
         }]
       },
-      heroku: {
-        files: [{
-          expand: true,
-          dot: true,
-          dest: 'heroku',
-          src: [
-            '<%= yeoman.dist %>/**',
-            '<%= yeoman.views %>/**'
-          ]
-        }, {
-          expand: true,
-          dest: 'heroku',
-          src: [
-            'package.json',
-            'server.js',
-            'lib/**/*'
-          ]
-        }]
-      },
       styles: {
         expand: true,
         cwd: '<%= yeoman.app %>/styles',
@@ -304,7 +321,11 @@ module.exports = function (grunt) {
       }
     },
 
-    // Run some tasks in parallel to speed up the build process
+    /*
+     * concurrent
+     *
+     * Run some tasks in parallel to speed up the build process
+     */
     concurrent: {
       server: [
         'copy:styles'
@@ -320,39 +341,30 @@ module.exports = function (grunt) {
       ]
     },
 
-    // By default, your `index.html`'s <!-- Usemin block --> will take care of
-    // minification. These next options are pre-configured if you do not wish
-    // to use the Usemin blocks.
-    // cssmin: {
-    //   dist: {
-    //     files: {
-    //       '<%= yeoman.dist %>/styles/main.css': [
-    //         '.tmp/styles/{,*/}*.css',
-    //         '<%= yeoman.app %>/styles/{,*/}*.css'
-    //       ]
-    //     }
-    //   }
-    // },
-    // uglify: {
-    //   dist: {
-    //     files: {
-    //       '<%= yeoman.dist %>/scripts/scripts.js': [
-    //         '<%= yeoman.dist %>/scripts/scripts.js'
-    //       ]
-    //     }
-    //   }
-    // },
-    // concat: {
-    //   dist: {}
-    // },
-
-    // Test settings
+    /*
+     * test settings
+     */
     karma: {
       unit: {
         configFile: 'karma.conf.js',
         singleRun: true
       }
+    },
+
+    /**
+     * git clone
+     *
+     * pull down blog post
+     */
+    gitclone: {
+      blog: {
+        options: {
+          repository: 'https://kalmas@bitbucket.org/kalmas/blog.git',
+          directory: 'app/blog/content'
+        }
+      }
     }
+
   });
 
   grunt.registerTask('express-keepalive', 'Keep grunt running', function() {
@@ -373,11 +385,6 @@ module.exports = function (grunt) {
       'open',
       'watch'
     ]);
-  });
-
-  grunt.registerTask('server', function () {
-    grunt.log.warn('The `server` task has been deprecated. Use `grunt serve` to start a server.');
-    grunt.task.run(['serve']);
   });
 
   grunt.registerTask('test', [
@@ -403,10 +410,8 @@ module.exports = function (grunt) {
     'usemin'
   ]);
 
-  grunt.registerTask('heroku', [
-    'build',
-    'clean:heroku',
-    'copy:heroku'
+  grunt.registerTask('get-blog', [
+    'gitclone:blog'
   ]);
 
   grunt.registerTask('default', [
