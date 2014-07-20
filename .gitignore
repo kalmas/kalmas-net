@@ -4,8 +4,9 @@ node_modules
 app/bower_components
 heroku
 
-public/
-views/
+blog
+public
+views
 
 .idea
 .DS_Store

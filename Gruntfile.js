@@ -27,6 +27,9 @@ module.exports = function (grunt) {
       dist: 'public',
       views: 'views'
     },
+    custom: {
+      blog_path: 'content/blog'
+    },
     express: {
       options: {
         port: process.env.PORT || 9000
@@ -120,6 +123,12 @@ module.exports = function (grunt) {
      * Deletes dirs created by build
      */
     clean: {
+      dev: {
+        files: [{
+          dot: true,
+          src: ['<%= yeoman.app %>/content']
+        }]
+      },
       dist: {
         files: [{
           dot: true,
@@ -286,6 +295,14 @@ module.exports = function (grunt) {
      * Copies remaining files to places other tasks can use
      */
     copy: {
+      dev: {
+        files: [{
+          expand: true,
+          cwd: 'blog',
+          dest: '<%= yeoman.app %>/<%= custom.blog_path %>',
+          src: ['**/*.{html,json,jpg}']
+        }]
+      },
       dist: {
         files: [{
           expand: true,
@@ -296,9 +313,7 @@ module.exports = function (grunt) {
             '*.{ico,png,txt}',
             'bower_components/**/*',
             'images/{,*/}*.{webp}',
-            'fonts/**/*',
-            'blog/**/*',
-            '!blog/content/.git'
+            'fonts/**/*'
           ]
         }, {
           expand: true,
@@ -311,6 +326,11 @@ module.exports = function (grunt) {
           cwd: '.tmp/images',
           dest: '<%= yeoman.dist %>/images',
           src: ['generated/*']
+        }, {
+          expand: true,
+          cwd: 'blog',
+          dest: '<%= yeoman.dist %>/<%= custom.blog_path %>',
+          src: ['**/*.{html,json,jpg}']
         }]
       },
       styles: {
@@ -359,8 +379,7 @@ module.exports = function (grunt) {
     gitclone: {
       blog: {
         options: {
-          repository: 'https://kalmas@bitbucket.org/kalmas/blog.git',
-          directory: 'app/blog/content'
+          repository: 'https://kalmas@bitbucket.org/kalmas/blog.git'
         }
       }
     }
@@ -381,6 +400,7 @@ module.exports = function (grunt) {
       'bower-install',
       'concurrent:server',
       'autoprefixer',
+      'copy:dev',
       'express:dev',
       'open',
       'watch'

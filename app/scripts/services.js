@@ -7,7 +7,7 @@ var services = angular.module('kalmasNetApp.services', []);
  * Retrieves post content and meta data
  */
 services.factory('BlogPosts', ['$http', '$q', function($http, $q) {
-  var path = 'blog/content/',
+  var path = 'content/blog/',
     contentFormat = '.html',
     tocFile = 'toc.json',
     toc;
@@ -134,8 +134,8 @@ services.factory('BlogPosts', ['$http', '$q', function($http, $q) {
  */
 services.factory('Page', function() {
   var siteName = 'kalmas.net',
-    pageName,
-    pageDesc = 'so cool';
+    pageName = '',
+    pageDesc = '';
 
   return {
     setTitle: function(name) {
@@ -165,7 +165,7 @@ services.factory('About', ['$http', '$q', function($http, $q) {
 
   var fetchAbout = function() {
     var deferred = $q.defer(),
-      aboutPath = 'blog/content/about.json';
+      aboutPath = 'content/blog/about.json';
     
     if(about !== undefined) {
       deferred.resolve(about);
