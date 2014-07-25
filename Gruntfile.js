@@ -382,7 +382,26 @@ module.exports = function (grunt) {
           repository: 'https://kalmas@bitbucket.org/kalmas/blog.git'
         }
       }
-    }
+    },
+
+    /**
+     * exec
+     *
+     */
+     execute: {
+       "build-snapshot-dev": {
+         src: ['scripts/buildSnapshots.js'],
+         options: {
+           args: ['../app/content/snapshots']
+         },
+       },
+       "build-snapshot-dist": {
+         src: ['scripts/buildSnapshots.js'],
+         options: {
+           args: ['../public/content/snapshots']
+         },
+       }
+     }
 
   });
 
@@ -392,11 +411,11 @@ module.exports = function (grunt) {
 
   grunt.registerTask('serve', function (target) {
     if (target === 'dist') {
-      return grunt.task.run(['build', 'express:prod', 'open', 'express-keepalive']);
+      return grunt.task.run(['clean', 'build', 'express:prod', 'open', 'express-keepalive']);
     }
 
     grunt.task.run([
-      'clean:server',
+      'clean',
       'bower-install',
       'concurrent:server',
       'autoprefixer',
@@ -439,4 +458,13 @@ module.exports = function (grunt) {
     'test',
     'build'
   ]);
+
+  grunt.registerTask('snapshot', function (target) {
+    if (target === 'dist') {
+      return grunt.task.run(['execute:build-snapshot-dist']);
+    }
+
+    grunt.task.run(['execute:build-snapshot-dev']);
+  });
+
 };

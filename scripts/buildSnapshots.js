@@ -7,21 +7,18 @@
 var exec = require('child_process').exec,
   fs = require('fs'),
   path = require('path'),
-  contentDir = path.join(__dirname, '../app/content'),
-  snapshotsDir = path.join(contentDir, 'snapshots'),
-  blogTocFile = path.join(contentDir, 'blog/toc.json'),
+  mkdirp = require('mkdirp'),
+  snapshotsDir = path.join(__dirname, process.argv[2]), // '../app/content/snapshots'
+  blogTocFile = path.join(__dirname, '../blog/toc.json'),
   blogToc = JSON.parse(fs.readFileSync(blogTocFile)),
   host = 'http://localhost:9000'
   staticPages = [
   	{ path: '/', file: 'index.html'}
   ];
 
-if(!fs.existsSync(snapshotsDir)){
-  fs.mkdirSync(snapshotsDir);
-}
-
+// make destination location if needed
 if(!fs.existsSync(path.join(snapshotsDir, 'blog'))){
-  fs.mkdirSync(path.join(snapshotsDir, 'blog'));
+  mkdirp.sync(path.join(snapshotsDir, 'blog'));
 }
 
 /*

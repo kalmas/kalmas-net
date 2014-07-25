@@ -12,7 +12,7 @@ describe('Controller: IndexCtrl', function () {
   // Initialize the controller and a mock scope
   beforeEach(inject(function (_$httpBackend_, $controller, $rootScope) {
     $httpBackend = _$httpBackend_;
-    $httpBackend.expectGET('blog/content/about.json').respond({interests: {}});
+    $httpBackend.expectGET('content/blog/about.json').respond({interests: {}});
     scope = $rootScope.$new();
     IndexCtrl = $controller('IndexCtrl', {
       $scope: scope
