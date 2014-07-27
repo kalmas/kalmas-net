@@ -387,18 +387,19 @@ module.exports = function (grunt) {
     /**
      * exec
      *
+     * run our snapshot generating script
      */
      execute: {
        "build-snapshot-dev": {
          src: ['scripts/buildSnapshots.js'],
          options: {
-           args: ['../app/content/snapshots']
+           args: ['../app/content/snapshots', 'localhost:9000']
          },
        },
        "build-snapshot-dist": {
          src: ['scripts/buildSnapshots.js'],
          options: {
-           args: ['../public/content/snapshots']
+           args: ['../public/content/snapshots', 'kalmas.net']
          },
        }
      }

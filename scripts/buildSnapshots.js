@@ -10,8 +10,9 @@ var exec = require('child_process').exec,
   mkdirp = require('mkdirp'),
   snapshotsDir = path.join(__dirname, process.argv[2]), // '../app/content/snapshots'
   blogTocFile = path.join(__dirname, '../blog/toc.json'),
+  hostName = process.argv[3]
   blogToc = JSON.parse(fs.readFileSync(blogTocFile)),
-  host = 'http://localhost:9000'
+  host = 'http://' + hostName
   staticPages = [
   	{ path: '/', file: 'index.html'}
   ];
@@ -22,7 +23,7 @@ if(!fs.existsSync(path.join(snapshotsDir, 'blog'))){
 }
 
 /*
- * Call our handy phantom script, which will dump rendered html to the console
+ * Call our handy phantom-js script, which will dump rendered html to the console
  */
 var saveMarkup = function (url, file) {
   exec('phantomjs ' + __dirname + '/takeSnapshot.phantom.js ' + url, function (error, stdout, stderr) {
@@ -42,7 +43,7 @@ blogToc.content.forEach(function (post) {
 });
 
 /*
- * Render the static pages (i.e. the index
+ * Render the static pages (i.e. the index page)
  */
 staticPages.forEach(function (page) {
   var url = host + page.path,

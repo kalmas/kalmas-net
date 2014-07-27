@@ -6,13 +6,11 @@
  */
 var page = require('webpage').create(),
   system = require('system'),
-  url = system.args[1] || '',
-  scriptTagRegex = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
-  // localhost = 'localhost:3000',
-  // realhost = 'kalmas.net';
+  url = system.args[1];
 
+// strip the script
 var stripIt = function (html) {
-  // var html = html.replace(localhost, realhost);
+  var scriptTagRegex = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
   return html.replace(scriptTagRegex, '');
 }
 
