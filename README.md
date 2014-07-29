@@ -1,14 +1,22 @@
 kalmas-net
 ==========
 
+Init
+
+```sh
+npm install -g grunt-cli
+npm install
+bower install
+```
+
 Checkout Content
 
 ```sh
 grunt get-blog
 ```
 
-Dev
----
+Run Dev
+-------
 
 Serve
 
@@ -23,24 +31,24 @@ Generate Dev Snapshots
 grunt snapshot
 ```
 
-Prod
-----
+Run Prod
+--------
 
 Build
 
 ```sh
-grunt 
+grunt build
 ```
 
 Run
 
 ```sh
-NODE_ENV=production node server.js
+./start.sh
 ```
 
 Generate Production Snapshots
 
 ```sh
-# while site is running in production mode
+# while site is running in production mode (kalmas.net)
 grunt snapshot:dist
 ```
