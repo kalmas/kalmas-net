@@ -300,7 +300,7 @@ module.exports = function (grunt) {
           expand: true,
           cwd: 'blog',
           dest: '<%= yeoman.app %>/<%= custom.blog_path %>',
-          src: ['**/*.{html,json,jpg}']
+          src: ['**/*.{html,json,jpg,png}']
         }]
       },
       dist: {
@@ -330,7 +330,7 @@ module.exports = function (grunt) {
           expand: true,
           cwd: 'blog',
           dest: '<%= yeoman.dist %>/<%= custom.blog_path %>',
-          src: ['**/*.{html,json,jpg}']
+          src: ['**/*.{html,json,jpg,png}']
         }]
       },
       styles: {
