@@ -1,14 +1,14 @@
-node_modules
+node_modules/
 .tmp
 .sass-cache
-app/bower_components
-heroku
+app/bower_components/
+heroku/
+public/
 
-blog
-public
-views
+blog/
+views/
 
 .idea
 .DS_Store
 
-app/content
+app/content/

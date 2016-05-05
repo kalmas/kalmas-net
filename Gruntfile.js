@@ -78,7 +78,7 @@ module.exports = function (grunt) {
           '{.tmp,<%= yeoman.app %>}/scripts/{,*//*}*.js',
           '<%= yeoman.app %>/images/{,*//*}*.{png,jpg,jpeg,gif,webp,svg}',
         ],
-      
+
         options: {
           livereload: true
         }
@@ -310,7 +310,7 @@ module.exports = function (grunt) {
           cwd: '<%= yeoman.app %>',
           dest: '<%= yeoman.dist %>',
           src: [
-            '*.{ico,png,txt}',
+            '*.{ico,png,txt,html}',
             'bower_components/**/*',
             'images/{,*/}*.{webp}',
             'fonts/**/*'
