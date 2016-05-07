@@ -5,7 +5,7 @@ angular.module('kalmasNetApp')
 
     $scope.menu = [{
       'title': 'Home',
-      'link': '/',
+      'link': 'http://kalmas.net',
       'pattern': /^\/$/
     },
     {

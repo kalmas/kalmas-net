@@ -9,10 +9,6 @@ angular.module('kalmasNetApp', [
 ])
   .config(function ($routeProvider, $locationProvider) {
     $routeProvider
-      .when('/', {
-        templateUrl: 'partials/index',
-        controller: 'IndexCtrl'
-      })
       .when('/blog', {
         templateUrl: 'partials/blog',
         controller: 'BlogCtrl'

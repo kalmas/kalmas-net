@@ -6,7 +6,6 @@ heroku/
 public/
 
 blog/
-views/
 
 .idea
 .DS_Store

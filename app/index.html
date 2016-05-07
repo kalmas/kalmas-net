@@ -1,15 +1,18 @@
 <!DOCTYPE html>
-<html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
 <head>
 	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 
 	<title>Kyle Almas | kalmas.net</title>
 
-	<!-- Behavioral Meta Data -->
+	<meta name="description" content="Kyle Almas is a software engineer in Norfolk, VA. This is his website.">
 	<meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
-	<!-- Styles -->
 	<link rel="stylesheet" media="screen" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css">
 	<link rel="stylesheet" media="screen" href="https://fontlibrary.org/face/cinzel" type="text/css"/>
 	<link rel="stylesheet" media="screen" href="https://fontlibrary.org/face/fantasque-sans-mono" type="text/css"/>
@@ -137,18 +140,12 @@
 		  color: #039be5;
 		}
 	</style>
-	<script>
-	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-	  ga('create', 'UA-35175562-1', 'auto');
-	  ga('send', 'pageview');
-
-	</script>
 </head>
 <body>
+	<!--[if lt IE 7]>
+  		<p class="browsehappy">You are using an <strong>outdated</strong> browser.
+  		Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+	<![endif]-->
 
 	<div id="container" class="valign-wrapper">
 		<div class="card-panel card valign center-align layer" id="card" data-depth="0.00">
@@ -229,6 +226,16 @@
 				interests.append(shuffle(interestsItems.clone()));
 			}
 		});
+	</script>
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-35175562-1', 'auto');
+	  ga('send', 'pageview');
+
 	</script>
 </body>
 </html>
