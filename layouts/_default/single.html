@@ -1,0 +1,16 @@
+{{ partial "header" . }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/hopscotch.min.css" />
+</head>
+<body>
+
+{{ partial "nav" . }}
+<section class="section margin-bottom-xlg">
+  <div class="container">
+    <h2 class="size-medium grey">{{ .Date.Format "January 2, 2006" }}</h2>
+    <h1>{{ .Title }}</h1>
+    <div class="content">
+      {{ .Content }}
+    </div>
+  </div>
+</section>
+{{ partial "footer" . }}

@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+	<meta name="generator" content="Hugo 0.19" />
+  <meta charset="utf-8">
+  <title>kalmas.net</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+
+  <link href="https://fonts.googleapis.com/css?family=Cinzel|Ubuntu+Mono|Lora" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://kalmas.net/css/reset.css">
+  <link rel="stylesheet" href="https://kalmas.net/css/style.css">
+
+
+
+
+  <link rel="stylesheet" href="https://kalmas.net/css/home.css">
+
+</head>
+<body>
+
+<div id="container" class="valign-wrapper">
+<div class="card-panel card valign center layer" id="card" data-depth="0.00">
+	<div class="card-content">
+		<h1>Kyle Almas</h1>
+		<h2>Software Developer</h2>
+		<h3>Nofolk, VA</h3>
+		<hr class="underline" id="line-left" /><hr class="underline" id="line-right" />
+		<div id="email">kylealmas@gmail.com</div>
+		<ul id="links">
+			<li><a href="/blog/">Blog</a></li>
+			<li><a href="https://github.com/kalmas">GitHub</a></li>
+			<li><a href="https://kalmas.github.io/resume">Resume</a></li>
+		</ul>
+	</div>
+</div>
+<div id="background" class="flow-text layer" data-depth="0.50">
+	<ul id="skills">
+		<li>AngularJS</li>
+		<li>Bash</li>
+		<li>Coffee</li>
+		<li>Comic Books</li>
+		<li>CSS</li>
+		<li>ElasticSearch</li>
+		<li>Docker</li>
+		<li>Documentation</li>
+		<li>Geospatial Search</li>
+		<li>Git</li>
+		<li>Gradle</li>
+		<li>Heroku</li>
+		<li>Java</li>
+		<li>JavaScript</li>
+		<li>Logstash</li>
+		<li>PHP</li>
+		<li>Reactive Programming</li>
+		<li>REST</li>
+		<li>RxJs</li>
+		<li>Microservices</li>
+		<li>MongoDB</li>
+		<li>Node.js</li>
+		<li>Norfolk</li>
+		<li>Pop Music</li>
+		<li>Redis</li>
+		<li>Running</li>
+		<li>Spring Data</li>
+		<li>Spring Web MVC</li>
+		<li>SQL Server</li>
+		<li>TypeScript</li>
+		<li>Unit Testing</li>
+		<li>Vegan Food</li>
+	</ul>
+</div>
+
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/parallax/2.1.3/jquery.parallax.min.js" integrity="sha256-4u4WqRB9kBJl3fq6NvRuyvScYg4BATiL6Smqh1bJB1s=" crossorigin="anonymous"></script>
+
+<script>
+function isBackgroundFilled() {
+	if ($('#skills').height() > ($(window).height()) * 2) {
+		return true;
+	}
+
+	return false;
+}
+
+function shuffle(array) {
+	var length = array.length;
+	var currentIndex = length;
+	var randomIndex;
+	var temp;
+
+	while (currentIndex > 1) {
+		randomIndex = Math.floor(Math.random() * currentIndex);
+		currentIndex = currentIndex - 1;
+
+		temp = array[currentIndex];
+		array[currentIndex] = array[randomIndex];
+		array[randomIndex] = temp;
+	}
+
+	return array;
+}
+
+$(document).ready(function() {
+	var interests = $('#skills');
+	var interestsItems = interests.children('li');
+	interests.empty();
+
+	$('#container').parallax();
+
+	while(!isBackgroundFilled()) {
+		interests.append(shuffle(interestsItems.clone()));
+	}
+});
+</script>
+</body>
+</html>

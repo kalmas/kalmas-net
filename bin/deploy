@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+myDir="$(dirname "$(realpath "$0")")"
+
+hugo
+rm -rf /var/www/kalmas/*
+cp -r $myDir/../public/* /var/www/kalmas/

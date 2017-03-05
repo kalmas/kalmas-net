@@ -1,0 +1,1538 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Blog on kalmas.net</title>
+    <link>https://kalmas.net/blog/index.xml</link>
+    <description>Recent content in Blog on kalmas.net</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Tue, 25 Nov 2014 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://kalmas.net/blog/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Door Bot</title>
+      <link>https://kalmas.net/blog/2014-11-25_door-bot/</link>
+      <pubDate>Tue, 25 Nov 2014 00:00:00 +0000</pubDate>
+      
+      <guid>https://kalmas.net/blog/2014-11-25_door-bot/</guid>
+      <description>&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;For a good long while (2 whole years according to Github commits 😩), my buddy Cody and I have been hacking on an automatic door lock for the front door of his house. We&amp;#8217;ve gone through a handful of iterations and dead-ends (the most painful of which involved attempting to write a REST webservice for the Arduino Ethernet Shield), but a few days ago we finally finished. I&amp;#8217;m ready to put this project to bed and move on to building &lt;strong&gt;real&lt;/strong&gt; robots (the walking, talking, terminating kind). So to wrap things up, here&amp;#8217;s a blog post&amp;#8230;&amp;#8203;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.instagram.com/p/vcaZWJMZc4/&#34;&gt;But first an adorable video!&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_version_0&#34;&gt;Version 0&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;To explain our project, I&amp;#8217;ll begin with the first iteration of what I will refer to, lovingly, as DoorBot (™ pending). The first DoorBot was something Cody hacked together over a few days: an &lt;a href=&#34;http://arduino.cc/en/Main/arduinoBoardUno&#34;&gt;Arduino Uno&lt;/a&gt; connected to a &lt;a href=&#34;http://www.amazon.com/Black-Plastic-Weigand-Proximity-Reader/dp/B00AUB2RQ4/ref=sr_1_3?ie=UTF8&amp;amp;qid=1416784413&#34;&gt;Arduino Uno&lt;/a&gt; and a &lt;a href=&#34;http://www.amazon.com/Generic-Secure-Electric-Strike-Control/dp/B00JWDE98K/ref=sr_1_4?s=electronics&amp;amp;ie=UTF8&amp;amp;qid=1416784606&#34;&gt;resting closed electric door lock&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;It worked like this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;olist arabic&#34;&gt;
+&lt;ol class=&#34;arabic&#34;&gt;
+&lt;li&gt;
+&lt;p&gt;A RFID card is swiped past the card reader.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The Arduino receives a string of bytes containing the card&amp;#8217;s passcode.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;If the code is found in a hardcoded list, a pin on the Arduino is turned on for 2 seconds, opening the electric lock.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;The code wasn&amp;#8217;t pretty and the wiring was slapdash (Cody pointed out that the 2 second open time was convenient because a duration much longer would present a risk of fire), but it worked, reliably and without maintenance, for over two years.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_if_it_ain_t_broke_fix_it&#34;&gt;If It Ain&amp;#8217;t Broke, Fix It&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;I decided a necessary enhancement was connecting DoorBot to the Internet. Half of my motivation was to use the project as a learning exercise to better understand the path from solenoid to HTTP. The other half was a desire to bring the logic up to a level where I could use my skill set; several days of compiling &lt;a href=&#34;http://arduino.cc/en/Reference/HomePage&#34;&gt;weird code&lt;/a&gt; to run inside a &lt;a href=&#34;http://stackoverflow.com/questions/7225693/how-do-you-debug-arduino-code-running-on-arduino-hardware&#34;&gt;black box of un-debuggable-ness&lt;/a&gt; had me feeling pretty unproductive.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Cody and I planned to build a simple website that could be used to remotely open the lock. This would be a good learning experience for both of us, and would satisfy the real world use cases of:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;ulist&#34;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Opening the door without a card (or key).&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Opening the door for someone without going downstairs.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Should be pretty simple I thought. We would be done in a week.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_version_1_2_years_later&#34;&gt;Version 1 (2 Years Later)&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Our latest, working, iteration was completed on November 6th (I almost finished this blog post the same week&amp;#8230;&amp;#8203; alas). It provides the same RFID card reading functionality as Version 0, and adds a one button website to open the door. To accomplish this we ended up adding a &lt;a href=&#34;http://www.amazon.com/Raspberry-Pi-Model-512MB-Computer/dp/B00LPESRUK&#34;&gt;Raspberry Pi&lt;/a&gt; to the DoorBot. Leaving us with an &lt;strong&gt;only slightly&lt;/strong&gt; overkill design.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;&lt;span class=&#34;image&#34;&gt;&lt;img src=&#34;https://kalmas.net/img/door-bot.png&#34; alt=&#34;Door Bot Diagram&#34;&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;The web portion of the system works like this:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;olist arabic&#34;&gt;
+&lt;ol class=&#34;arabic&#34;&gt;
+&lt;li&gt;
+&lt;p&gt;The Pi serves a website over Wi-Fi.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;When the button is clicked, an open signal is sent over USB to the Arduino.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;A signal interrupts the main RFID card reading loop and opens the lock.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect2&#34;&gt;
+&lt;h3 id=&#34;_on_the_arduino&#34;&gt;On The Arduino&lt;/h3&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;The code on the Arduino runs a continuous loop that does 2 things.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;First, it checks the RFID sensor for input, reads that input a valid passcode, and maybe opens the door.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;/**
+ * Read from RFID
+ */
+if (mySerial.available()) {
+
+    Serial.write(&#34;Incoming\n&#34;);
+    while(tagIndex &amp;lt; 13) {
+        if (mySerial.available()) {
+            int readByte = mySerial.read();
+
+            if (readByte != 2 &amp;amp;&amp;amp; readByte != 10 &amp;amp;&amp;amp; readByte != 13) {
+                tagString[tagIndex] = readByte;
+                tagIndex = tagIndex + 1;
+            }
+        }
+    }
+
+    Serial.write(&#34;Tag: &#34;);
+    Serial.write(tagString);
+    Serial.write(&#34;\n&#34;);
+
+    if (isAllowed(tagString)) {
+        Serial.write(&#34;Open Sesame!&#34;);
+        digitalWrite(lockPin, HIGH);
+        delay(2000);
+        digitalWrite(lockPin, LOW);
+    } else {
+        Serial.write(&#34;Sry, Not Allowed :(&#34;);
+    }
+
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Second, it listens for an &#34;open&#34; signal sent from the Raspberry Pi.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;/**
+ * Control lock
+ */
+if (Serial.available()) {
+    int incomingByte = Serial.read();
+
+    if (incomingByte == 0x01) {
+        digitalWrite(lockPin, HIGH);
+    } else if (incomingByte == 0x00) {
+        digitalWrite(lockPin, LOW);
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;One complication that we ran into was this: by default the Arduino uses the a specific pin (pin 1, I think?) to read serial input using its built in &lt;a href=&#34;http://arduino.cc/en/reference/serial&#34;&gt;Serial&lt;/a&gt; library, but Serial is also listening to the USB port for input. This means that if you want communication over USB, you can&amp;#8217;t use Serial to read from the default serial pin at the same time; the streams cross and nothing works. The workaround comes in the form of the &lt;a href=&#34;http://arduino.cc/en/Reference/softwareSerial&#34;&gt;SoftwareSerial&lt;/a&gt; library which allows you to reproduce the functionality of Serial using an arbitrary input and output pin. This is why in the code above there are references to both mySerial (connected to the RFID reader) and Serial (connected to the Pi). You can see how these two references are initialized along with the rest of the script here: &lt;a href=&#34;https://github.com/kalmas/web-door/blob/master/micro_door/micro_door.ino&#34; class=&#34;bare&#34;&gt;https://github.com/kalmas/web-door/blob/master/micro_door/micro_door.ino&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect2&#34;&gt;
+&lt;h3 id=&#34;_on_the_pi&#34;&gt;On The Pi&lt;/h3&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;The Pi is responsible for serving the website. We brought the Pi into the mix after realizing that coding an HTTP interface for the Arduino is a job for masochists. In contrast, on the Pi we can just write a few lines of JavaScript and call it a day. Case in point, here&amp;#8217;s most of the application code required to pass web requests through to the Arduino.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;var usb = &#39;/dev/ttyACM0&#39;;
+
+var express = require(&#39;express&#39;);
+var router = express.Router();
+var serialport = require(&#39;serialport&#39;);
+var SerialPort = serialport.SerialPort;
+var serial = new SerialPort(usb, {
+    baudrate: 9600,
+    parser: serialport.parsers.readline(&#34;\n&#34;)
+});
+
+// Close the lock.
+var close = function() {
+    serial.write(new Buffer([0x00]));
+};
+
+// Open the lock.
+var open = function() {
+    serial.write(new Buffer([0x01]));
+};
+
+router.get(&#39;/&#39;, function(req, res) {
+    res.render(&#39;index&#39;, { title: &#39;Who Dat?&#39; });
+});
+
+// Open the lock then close it 2 seconds later.
+router.post(&#39;/open&#39;, function(req, res) {
+    res.send();
+    open();
+    setTimeout(close, 2000);
+});
+
+module.exports = router;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;The heavy lifting here is done by &lt;a href=&#34;https://github.com/strongloop/expressjs.com&#34;&gt;express&lt;/a&gt; and &lt;a href=&#34;https://github.com/voodootikigod/node-serialport&#34;&gt;node-serialport&lt;/a&gt;. node-serialport is pretty slick and I can&amp;#8217;t wait to use it for future robotics projects. Just provide it a USB port address and a baud rate and you&amp;#8217;re ready to talk to any piece of hardware.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;To get the Pi connected to the network we installed an &lt;a href=&#34;http://www.amazon.com/Edimax-EW-7811Un-150Mbps-Raspberry-Supports/dp/B003MTTJOY/ref=pd_bxgy_pc_img_y&#34;&gt;outrageously cheap USB Wi-Fi dongle&lt;/a&gt; using these easy setup instructions &lt;a href=&#34;http://kerneldriver.wordpress.com/2012/10/21/configuring-wpa2-using-wpa_supplicant-on-the-raspberry-pi/&#34; class=&#34;bare&#34;&gt;http://kerneldriver.wordpress.com/2012/10/21/configuring-wpa2-using-wpa_supplicant-on-the-raspberry-pi/&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;To make the server run as a service on boot, we added to the &lt;code&gt;/etc/rc.local.sh&lt;/code&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;su web -c &#39;/bin/sh /home/pi/web-door/node-door/start.sh &amp;lt; /dev/null &amp;amp;&#39;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;And made a &lt;code&gt;start.sh&lt;/code&gt; to start the node server.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;#!/bin/bash
+
+/usr/bin/sudo /usr/local/bin/node /home/pi/web-door/node-door/app.js&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect2&#34;&gt;
+&lt;h3 id=&#34;_finished_product&#34;&gt;Finished Product&lt;/h3&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;The final product works remarkably well. Connecting to the network and pulling up the website is easily done on the way up the driveway. I&amp;#8217;ve encounted a few unexplained server outages, but in these cases I can just fall back to using my RFID card (which always works like a champ). This is my first experience writing code that makes stuff physically move, and it really makes me feel like a magician.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;See the full code &lt;a href=&#34;https://github.com/kalmas/web-door&#34;&gt;here&lt;/a&gt;. See the door itself on the front of Cody&amp;#8217;s house.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>How This Blog Works</title>
+      <link>https://kalmas.net/blog/2014-08-25_how-this-blog-works/</link>
+      <pubDate>Mon, 25 Aug 2014 00:00:00 +0000</pubDate>
+      
+      <guid>https://kalmas.net/blog/2014-08-25_how-this-blog-works/</guid>
+      <description>&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;&lt;em&gt;[This is an article about how my blog &lt;strong&gt;used&lt;/strong&gt; to work. Today it uses &lt;a href=&#34;https://gohugo.io/&#34;&gt;Hugo&lt;/a&gt;. I&amp;#8217;ll write a post about the current set up one day&amp;#8230;&amp;#8203; it&amp;#8217;s much simpler.]&lt;/em&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;I was recently forced to deploy this blog on a new server, and it was pretty terrible. The problem was that I expected myself to remember a process with more than 1 step; history has proven that this expectation is ridiculous. In the months since my last update, I had completely forgotten the steps required to deploy this blog and largely forgotten the specifics of how it is supposed to work.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Being forced to relearn an entire application in order to perform routine maintenance served as a painful reminder of why it&amp;#8217;s valuable to spend a little extra time documenting your code. Determined to not make the same mistake twice, I decided to write How It Works post to help my future self. Let&amp;#8217;s get meta!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_overview&#34;&gt;Overview&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;I wanted to keep the design as simple as possible. My initial requirements were:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;ulist&#34;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Allow entries written in Markdown and to be presented as pretty HTML&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Use &lt;a href=&#34;https://angularjs.org/&#34;&gt;Angular&lt;/a&gt; and &lt;a href=&#34;http://gruntjs.com/&#34;&gt;Grunt&lt;/a&gt; (just because)&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;To keep things uncomplicated, I decided the backend would be a static file system. All dynamic behavior would be handled by angular.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_static_backend&#34;&gt;Static Backend&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Starting from a post written in Markdown, my first step to publishing is to manually run the document through &lt;a href=&#34;https://developer.github.com/v3/markdown/&#34;&gt;Github&amp;#8217;s markdown api&lt;/a&gt;. The translated HTML file gets pushed to a directory served by the &lt;a href=&#34;http://expressjs.com/4x/api.html#app.use&#34;&gt;express static middlewear&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;For example, the content of &lt;a href=&#34;http://kalmas.net/blog/scramble-squares&#34; class=&#34;bare&#34;&gt;http://kalmas.net/blog/scramble-squares&lt;/a&gt; can be accessed at &lt;a href=&#34;http://kalmas.net/content/blog/scramble-squares.html&#34; class=&#34;bare&#34;&gt;http://kalmas.net/content/blog/scramble-squares.html&lt;/a&gt;. Boom, easy.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_dynamic_frontend&#34;&gt;Dynamic Frontend&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Now that content is being served, it is ready to be pulled into a UI by Angular. For a basic example of how everything comes together, let&amp;#8217;s look at the sequence of events that occur when a user lands at &lt;a href=&#34;http://kalmas.net/blog/scramble-squares&#34; class=&#34;bare&#34;&gt;http://kalmas.net/blog/scramble-squares&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;1: Angular&amp;#8217;s route provider service examines the URL to see if it matches a specified route. It does, and the request is handed to the blog controller (BlogCtrl).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;// app/scripts/app.js
+$routeProvider
+  .when(&#39;/blog/:slug&#39;, {
+    templateUrl: &#39;partials/blog&#39;,
+    controller: &#39;BlogCtrl&#39;
+  })&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;2: The BlogCtrl asks a BlogPosts service for the post linked to the requested slug (&#34;scramble-squares&#34;).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;// app/scripts/controllers/blog.js
+BlogPosts.getPostBySlug(slug)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;3: The BlogPosts service requests a Table of Contents from the server (it&amp;#8217;s at &lt;a href=&#34;http://kalmas.net/content/blog/toc.json&#34; class=&#34;bare&#34;&gt;http://kalmas.net/content/blog/toc.json&lt;/a&gt;) and looks to see if there is an item with the requested slug. Assuming there is, we get back a blog post object.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;{
+  slug: &#34;scramble-squares&#34;,
+  title: &#34;Hacking Scramble Squares&#34;,
+  date: &#34;2014-01-01&#34;,
+  desk: &#34;Programming&#34;,
+  desc: &#34;For his birthday, my dad received a puzzle from a family friend. The puzzle is called Scramble Squares® and the concept is simple: A player starts out with nine square pieces, each with a different design&#34;,
+  content-path: &#34;content/blog/scramble-squares.html&#34;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;4: The blog post object gives us all the data we need to render the page. The most important bit is the &lt;code&gt;content-path&lt;/code&gt;, which holds the path to the blog post&amp;#8217;s html (&lt;a href=&#34;http://kalmas.net/content/blog/scramble-squares.html&#34; class=&#34;bare&#34;&gt;http://kalmas.net/content/blog/scramble-squares.html&lt;/a&gt;). Angular makes it easy for us to auto-magically render this content in the browser.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&amp;lt;div class=&#34;content&#34; ng-include=&#34;post.contentPath&#34;&amp;gt;&amp;lt;/div&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_serving_the_robots&#34;&gt;Serving The Robots&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Eventually I realized that there was a third, unforeseen requirement forced upon me by the nature of single page web apps and search engine web crawlers.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;ulist&#34;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Serve fully rendered static HTML to robotic visitors (for the SEO)&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Search engine web crawlers don&amp;#8217;t run JavaScript, so content that gets injected into the DOM via AJAX does not get indexed. In my case this is basically everything (just reload this page with JS disabled to see) I don&amp;#8217;t have huge expectations for the readership of this blog, but I&amp;#8217;d like to at least hope that it will pop up in a Google search occasionally. And besides, if the robots are reading, at least that&amp;#8217;s someone.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;There&amp;#8217;s obviously a solution to this indexing problem, but it&amp;#8217;s not trivial. Google and other search engines provide a way to specify a static (i.e. no JS required) version of your pages along side your fancy, unindexable one page app. It works like this: upon encountering a webpage with the meta tag &lt;code&gt;&amp;lt;meta name=&#34;fragment&#34; content=&#34;!&#34;&amp;gt;&lt;/code&gt;, the robots will make a request for the same base url with &lt;code&gt;/?&lt;em&gt;escaped_fragment&lt;/em&gt;=&lt;/code&gt; appended. The expectation is that the second URL will serve a static HTML version of the original page. As an example, a static version of &lt;a href=&#34;http://kalmas.net/blog/scramble-squares&#34; class=&#34;bare&#34;&gt;http://kalmas.net/blog/scramble-squares&lt;/a&gt; is available at &lt;a href=&#34;http://kalmas.net/?&#34; class=&#34;bare&#34;&gt;http://kalmas.net/?&lt;/a&gt;&lt;em&gt;escaped_fragment&lt;/em&gt;=/blog/scramble-squares&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;I generate the rendered HTML files using &lt;a href=&#34;http://phantomjs.org/&#34;&gt;PhantomJS&lt;/a&gt;. A build script runs through the Table of Contents to fetch all the blog post URLs. Each URL is then passed to a PhantomJS script that renders the DOM and then dumps out HTML.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;// scripts/takeSnapshot.phantom.js
+page.open(url, function(success) {
+  setTimeout(function () {
+    var html = page.evaluate(function () {
+      return document.getElementsByTagName(&#39;html&#39;)[0].outerHTML;
+    });
+
+    // send rendered html to console
+    console.log(stripIt(html));
+    phantom.exit();
+  }, 2000);
+});&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;The rendered HTML is saved to a file and served by an express middlewear that responds to requests for &lt;code&gt;?&lt;em&gt;escaped_fragment&lt;/em&gt;&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_build_process&#34;&gt;Build Process&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;In the process of relearning and redeploying my blog, I spent a lot of time getting familiar with Grunt and streamlining my build process. I had a lot of boilerplate stuff in my Gruntfile from when I first bootstraped the app with &lt;a href=&#34;https://github.com/DaftMonk/generator-angular-fullstack&#34; class=&#34;bare&#34;&gt;https://github.com/DaftMonk/generator-angular-fullstack&lt;/a&gt;. Everything worked so well the first time that I never really had to poke the Gruntfile, and as a result had a poor understanding of what exactly was going on.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;After taking it all apart and putting it back together I reduced my deployment process to a few (relatively) simple steps.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;1: Get blog content from its Git repository. This is done via the &lt;a href=&#34;https://github.com/rubenv/grunt-git&#34;&gt;grunt-git plugin&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;grunt get-blog&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;grunt.registerTask(&#39;get-blog&#39;, [
+  &#39;gitclone:blog&#39;
+]);
+
+// in grunt.initConfig
+gitclone: {
+  blog: {
+    options: {
+      repository: &#39;https://kalmas@bitbucket.org/kalmas/blog.git&#39;
+    }
+  }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;2: Build. A lot happens here, but most of it is boilerplate. We start by linting our code and running our tests. Next, we delete any previous build artifacts. Finally we install our UI dependencies, minimize everything, and copy our static resources (including blog HTML content) into a public directory.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;grunt&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;grunt.registerTask(&#39;default&#39;, [
+  &#39;newer:jshint&#39;,
+  &#39;test&#39;,
+  &#39;build&#39;
+]);
+
+grunt.registerTask(&#39;build&#39;, [
+  &#39;clean:dist&#39;,
+  &#39;bower-install&#39;,
+  &#39;useminPrepare&#39;,
+  &#39;concurrent:dist&#39;,
+  &#39;autoprefixer&#39;,
+  &#39;concat&#39;,
+  &#39;ngmin&#39;,
+  &#39;copy:dist&#39;,
+  &#39;cdnify&#39;,
+  &#39;cssmin&#39;,
+  &#39;uglify&#39;,
+  &#39;rev&#39;,
+  &#39;usemin&#39;
+]);&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;3: Serve. This step starts the server. To serve the site in production I simply run &lt;code&gt;node server.js&lt;/code&gt;, but while developing grunt provides a dev server that automatically polls for code changes. It&amp;#8217;s super handy.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;grunt serve&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;grunt.registerTask(&#39;serve&#39;, function (target) {
+  grunt.task.run([
+    &#39;clean&#39;,
+    &#39;bower-install&#39;,
+    &#39;concurrent:server&#39;,
+    &#39;autoprefixer&#39;,
+    &#39;copy:dev&#39;,
+    &#39;express:dev&#39;,
+    &#39;open&#39;,
+    &#39;watch&#39;
+  ]);
+});&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;4: Finally, once the site is running we can generate static HTML snapshots. This is done using the &lt;a href=&#34;https://github.com/Bartvds/grunt-execute&#34;&gt;grunt-execute plugin&lt;/a&gt; to call the PhantomJS script, which will drop the HTML to the expected location&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;grunt snapshot&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;grunt.registerTask(&#39;snapshot&#39;, function (target) {
+  if (target === &#39;dist&#39;) {
+    return grunt.task.run([&#39;execute:build-snapshot-dist&#39;]);
+  }
+
+  grunt.task.run([&#39;execute:build-snapshot-dev&#39;]);
+});
+
+// in grunt.initConfig
+execute: {
+  &#34;build-snapshot-dev&#34;: {
+    src: [&#39;scripts/buildSnapshots.js&#39;],
+    options: {
+      args: [&#39;../app/content/snapshots&#39;, &#39;localhost:9000&#39;]
+    },
+  },
+  &#34;build-snapshot-dist&#34;: {
+    src: [&#39;scripts/buildSnapshots.js&#39;],
+    options: {
+      args: [&#39;../public/content/snapshots&#39;, &#39;kalmas.net&#39;]
+    },
+  }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Find and Replace with Mongoose</title>
+      <link>https://kalmas.net/blog/2014-02-23_mongoose-find-and-replace/</link>
+      <pubDate>Sun, 23 Feb 2014 00:00:00 +0000</pubDate>
+      
+      <guid>https://kalmas.net/blog/2014-02-23_mongoose-find-and-replace/</guid>
+      <description>&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;I recently discovered a weird gap in the functionality of Mongoose. I&amp;#8217;ve been building a number of simple data caching services using Node, and &lt;a href=&#34;http://mongoosejs.com/&#34;&gt;Mongoose&lt;/a&gt; has been my swiss army knife for all things Mongo related. Schema definition, server connection, collection management, access to native driver; Mongoose makes it simple. All in all, it&amp;#8217;s a fantastic tool that has drastically reduced my lines of code dedicated db stuff.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;The gap that I mentioned has to do with a use case that I would assume is fairly common: I want to insert a document into a collection, replacing the existing version of the document if it exists. For example, I have new document with &lt;code&gt;_id: 123&lt;/code&gt;. If there is no document with the same &lt;code&gt;_id&lt;/code&gt; already in the collection, I want to insert the new document. If there is a document with the same &lt;code&gt;_id&lt;/code&gt;, I want to remove the old one and then insert the new one.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Based on the assumption that you found this page while struggling with the same problem, I&amp;#8217;ll skip the explination and give you the answer.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;/*
+ * My hacky solution for doing a find and replace with Mongoose
+ *
+ * 1. Validate object
+ * 2. Then strip extra fields
+ * 3. And finally upsert
+ */
+var weirdObject = { aNumericField: 14, weirdUnexpectedField: &#39;Tom Selleck&#39; };
+var weirdDocument = new CoolDocument(weirdObject);
+weirdDocument.validate(function (err) { // Validate
+	if (err) { throw new Error(&#39;Validation failed :(&#39;); }
+
+	var cleanObject = weirdDocument.toObject(); // Strip extra fields
+
+	collection.update({ _id: 123 }, // Upsert
+		cleanObject,
+		{ upsert: true },
+		callback);
+});
+
+// Stored in db:
+// { _id: 123, aNumericField: 14 }&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Now that that&amp;#8217;s out of the way, I&amp;#8217;ll walk you through the process by which I arrived here.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Oh you&amp;#8217;re still reading, okay&amp;#8230;&amp;#8203; Let&amp;#8217;s begin with how I could achieve this behavior with &lt;a href=&#34;https://github.com/mongodb/node-mongodb-native&#34;&gt;node-mongodb-native&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;collection.update({ _id: 123 },
+	newDocument,
+	{ upsert: true },
+	callback);&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;But why would I use the native driver when I have a cool utility lib to play with? Surely Mongoose has some sugar I can use.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;The standard save in Mongoose looks like this.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;var coolObject = { _id: 123, aNumericField: 3 };
+var coolDocument = new CoolDocument(coolObject);
+coolDocument.save();&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;But that won&amp;#8217;t work because &lt;code&gt;save&lt;/code&gt; doesn&amp;#8217;t have the ability to update an existing document, so I&amp;#8217;d need to use some clunky find-and-then-save process. I should be able to do better.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Turns out Mongoose provides a &lt;code&gt;findOneAndUpdate&lt;/code&gt; method on its model objects. That has a promising name and a signature identical to node-mongodb-native&amp;#8217;s &lt;code&gt;collection.update&lt;/code&gt;, but unfortunately it has 2 major flaws. The first is that &lt;code&gt;findOneAndUpdate&lt;/code&gt; totally bypasses schema validation and any other Mongoose middlewear.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;/*
+ * No good: Will upsert without forcing schema validation
+ */
+var invalidObject = { aNumericField: &#39;what? a string?&#39; };
+model.findOneAndUpdate({ _id: 123 },
+	invalidObject,
+	{ upsert: true },
+	callback);
+
+// Stored in db:
+// { _id: 123, aNumericField: &#39;what? a string?&#39; }&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Well, I&amp;#8217;m not using Mongoose to have all of my lovingly crafted schemas ignored, so that&amp;#8217;s a pain, but there&amp;#8217;s more. While &lt;code&gt;findOneAndUpdate&lt;/code&gt; looks and sounds a lot like &lt;code&gt;collection.update&lt;/code&gt;, it doesn&amp;#8217;t act like it. Instead of sending &lt;code&gt;newObject&lt;/code&gt; to the db for upsert like one might expect, it actually sends &lt;code&gt;{ $set: newObect }&lt;/code&gt;. This means that it won&amp;#8217;t totally replace any existing document, it will just update any fields attached to &lt;code&gt;newObject&lt;/code&gt;. So if I mean to delete some fields by not sending them, I won&amp;#8217;t be successful. Instead I&amp;#8217;ll end up with a merged offspring of the old and new documents.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;/*
+ * No good: Will merge documents instead of replacing
+ */
+var firstVersion = { aNumericField: 14 };
+model.findOneAndUpdate({ _id: 123 },
+	firstVersion,
+	{ upsert: true },
+	callback);
+
+// Stored in db:
+// { _id: 123, aNumericField: 14 }
+
+var secondVersion = { aStringField: &#39;cool&#39; };
+model.findOneAndUpdate({ _id: 123 },
+	secondVersion,
+	{ upsert: true },
+	callback);
+
+// Stored in db:
+// { _id: 123, aNumericField: 14, aStringField: &#39;cool&#39; }&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;The Mongoose documentation justifies this behavior with the argument that it prevents you from accidentally overwriting your documents. But what if I want to on purpose overwrite things? how do I do that?&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;I knew that I didn&amp;#8217;t want to use &lt;code&gt;findOneAndUpdate&lt;/code&gt;, because it works differently-than-guessable (a thing I try to avoid). But maybe I could combine &lt;code&gt;collection.update&lt;/code&gt; with an explicit call to &lt;code&gt;document.validate()&lt;/code&gt; to get the validation I wanted and the update behavior I expected.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;But alas, this results in a new problem. &lt;code&gt;document.validate&lt;/code&gt; will check each field defined in my schema, but any extra fields will be ignored by validation. This means that unexpected fields get a free ride into the database.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;/*
+ * No good: Will allow extra fields
+ */
+var weirdObject = { aNumericField: 14, weirdUnexpectedField: &#39;Tom Selleck&#39; };
+var weirdDocument = new CoolDocument(weirdObject);
+weirdDocument.validate(function (err) {
+	if (err) { throw new Error(&#39;Validation failed :(&#39;); }
+
+	collection.update({ _id: 123 },
+		weirdObject,
+		{ upsert: true },
+		callback);
+});
+
+// Stored in db:
+// { _id: 123, aNumericField: 14, weirdUnexpectedField: &#39;Tom Selleck&#39; }&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Finally, after many hours of head banging, I discovered the the solution was to:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;olist arabic&#34;&gt;
+&lt;ol class=&#34;arabic&#34;&gt;
+&lt;li&gt;
+&lt;p&gt;Call &lt;code&gt;document.validate&lt;/code&gt; to apply the schema validation&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Call &lt;code&gt;document.toObject&lt;/code&gt; to strip off any unexpected fields&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Upsert the cleaned object with &lt;code&gt;collection.update&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;If somehow you made it to the end of this post without seeing the working solution up top, please scroll up to the first code block now.&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Explaining Promises</title>
+      <link>https://kalmas.net/blog/2014-02-15_explaining-promises/</link>
+      <pubDate>Sat, 15 Feb 2014 00:00:00 +0000</pubDate>
+      
+      <guid>https://kalmas.net/blog/2014-02-15_explaining-promises/</guid>
+      <description>&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;I&amp;#8217;ve been working with node a lot recently, and as a result I&amp;#8217;ve been reading a lot about managing asynchronous code. I&amp;#8217;ve found that I particularly enjoy using the promises pattern, but I haven&amp;#8217;t yet taken the time to step back and fully contemplate how (if) it is benefiting my code. So, I&amp;#8217;ve decided to write a post explaining the basic usage  of promises, as a thought exercise for myself and hopefully as a useful guide for someone new to the concept. Here goes&amp;#8230;&amp;#8203;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;We&amp;#8217;ll start by looking at a simple piece of asynchronous code.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;var asyncGetMessage = function (callback) {
+    var message = &#39;an asynchronous &#34;hello!&#34;&#39;,
+        err = null;
+    setTimeout(function () {
+        callback(err, message);
+    }, 1000);
+};
+
+asyncGetMessage(function (err, message) {
+    if(err) {
+        throw new Error(&#39;whoops&#39;);
+    } else {
+        console.log(message);
+    }
+});
+
+console.log(&#39;a synchronous &#34;hi&#34;&#39;);&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;&lt;a href=&#34;http://jsfiddle.net/kalmas/x2Q4y/11/&#34;&gt;See the jsFiddle.&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;The example is obviously contrived (the &lt;code&gt;asyncGetMessage&lt;/code&gt; function is only asynchronous because &lt;code&gt;setTimeout&lt;/code&gt; is used to explicitly delay the response), but it illustrates a pattern thats common in javascript: a function that will return a result eventually is given a callback function containing code to be run once the result is available. In this example, the callback takes a message parameter and prints it out with &lt;code&gt;console.log&lt;/code&gt;. Because the callback isn&amp;#8217;t invoked until after 1000 milliseconds have passed, we see the second call to &lt;code&gt;console.log&lt;/code&gt; (&lt;code&gt;console.log(&#39;a synchronous &#34;hi&#34;&#39;);&lt;/code&gt;) execute first, followed by the call in the callback function shortly after.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Ok, so there&amp;#8217;s no problem with the code above. It&amp;#8217;s readable and concise, and I&amp;#8217;d probably argue that refactoring to use promises would be overkill. But let&amp;#8217;s take our example one step further.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;var asyncGetMessage = function (callback) {
+    var message = &#39;an asynchronous &#34;hello!&#34;&#39;,
+        err = null;
+    setTimeout(function () {
+        callback(err, message);
+    }, 1000);
+};
+
+var asyncCapitalize = function (input, callback) {
+    var message = input.toUpperCase(),
+        err = null;
+    setTimeout(function () {
+        callback(err, message);
+    }, 1000);
+};
+
+var asyncPrint = function (input, callback) {
+    var err = null;
+    setTimeout(function () {
+        console.log(input);
+        callback(err);
+    }, 1000);
+};
+
+asyncGetMessage(function (err, message) {
+    if (err) {
+        throw new Error(&#39;an error here&#39;);
+    } else {
+        asyncCapitalize(message, function (err, message) {
+            if (err) {
+                throw new Error(&#39;an error there&#39;);
+            } else {
+                asyncPrint(message, function (err) {
+                    if (err) {
+                        throw new Error(&#39;everywhere an error error&#39;);
+                    } else {
+                        console.log(&#39;finally done.&#39;);
+                    }
+                });
+            }
+        });
+    }
+});
+
+console.log(&#39;a synchronous &#34;hi&#34;&#39;);&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;&lt;a href=&#34;http://jsfiddle.net/kalmas/vpVgX/1/&#34;&gt;See the jsFiddle.&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;The above is a logical progression of our example (or as logical as we can be about useless code). Now when we get the result back from &lt;code&gt;asyncGetMessage&lt;/code&gt; we pass the result to another asynchronous function, &lt;code&gt;asyncCaptialize&lt;/code&gt;, which in turn sends its result to &lt;code&gt;asyncPrint&lt;/code&gt;, finally we notify the console that everything is done.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Each step is preformed by means of a function handed into the preceding function. The result is a pile of callbacks nested 3 layers deep. Even though our process is trivial, the asynchronous nature of our functions compounds the complexity of our program at every step. As the callbacks are nested deeper and deeper they become more difficult to read, to work on, and to understand. This is the point at which promises can help us improve our code.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;A promise flips the idea of a callback upside down: instead of sending a piece of code to be evaluated after resolution into a function, the function returns an object with the ability to alert the calling context when resolution occurs. The returned object is called a promise because it represents a promise to provide a value when (and if) it becomes available.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Let&amp;#8217;s look at our first piece of code rewritten to use promises.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-js&#34; data-lang=&#34;js&#34;&gt;var Q = require(&#39;q&#39;);
+
+var consoleLine = &#34;&amp;lt;p class=\&#34;console-line\&#34;&amp;gt;&amp;lt;/p&amp;gt;&#34;;
+console = {
+    log: function (text) {
+        $(&#34;#console-log&#34;).append($(consoleLine).html(text));
+    }
+};
+
+var asyncGetMessage = function () {
+    var deferred = Q.defer(),
+        message = &#39;an asynchronous &#34;hello!&#34;&#39;,
+        err = null;
+    setTimeout(function () {
+        if (err) {
+            deferred.reject(err);
+        } else {
+            deferred.resolve(message);
+        }
+    }, 1000);
+
+    return deferred.promise;
+};
+
+var promiseToGetMessage = asyncGetMessage();
+promiseToGetMessage.then(function (message) {
+    console.log(message);
+}, function (err) {
+    console.log(&#39;Error! &#39; + err)
+});
+
+console.log(&#39;a synchronous &#34;hi&#34;&#39;);&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;&lt;a href=&#34;http://jsfiddle.net/a5TdL/2/&#34;&gt;See the jsFiddle.&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Now &lt;code&gt;asyncGetMessage&lt;/code&gt; returns a promise, care of &lt;a href=&#34;https://github.com/kriskowal/q&#34;&gt;the super-fantastic Q library&lt;/a&gt;. The promise provides a &lt;code&gt;then&lt;/code&gt; method which accepts 2 handler functions. The first gets called with the message on success, the second with an error on failure. This looks a bit cleaner than our first example (to me anyway), but when callbacks start to stack up, promises really shine.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;var Q = require(&#39;q&#39;);
+
+var asyncGetMessage = function () {
+    var deferred = Q.defer(),
+        message = &#39;an asynchronous &#34;hello!&#34;&#39;,
+        err = null;
+    setTimeout(function () {
+        if (err) {
+            deferred.reject(err);
+        } else {
+            deferred.resolve(message);
+        }
+    }, 1000);
+
+    return deferred.promise;
+};
+
+var asyncCapitalize = function (input) {
+    var deferred = Q.defer(),
+        message = input.toUpperCase(),
+        err = null;
+    setTimeout(function () {
+        if (err) {
+            deferred.reject(err);
+        } else {
+            deferred.resolve(message);
+        }
+    }, 1000);
+
+    return deferred.promise;
+};
+
+var asyncPrint = function (input, callback) {
+    var deferred = Q.defer(),
+        err = null;
+    setTimeout(function () {
+        console.log(input);
+        if (err) {
+            deferred.reject(err);
+        } else {
+            deferred.resolve();
+        }
+    }, 1000);
+
+    return deferred.promise;
+};
+
+var promiseToGetMessage = asyncGetMessage();
+promiseToGetMessage.then(function (message) {
+    var promiseToCaptializeMessage = asyncCapitalize(message);
+    return promiseToCaptializeMessage;
+}).then(function (message) {
+    var promiseToPrintMessage = asyncPrint(message);
+    return promiseToPrintMessage;
+}).then(function () {
+    console.log(&#39;finally done&#39;);
+}).fail(function (err) {
+    console.log(&#39;something went horribly wrong!! &#39; + err);
+});
+
+console.log(&#39;a synchronous &#34;hi&#34;&#39;);&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;&lt;a href=&#34;http://jsfiddle.net/2E8Ts/3/&#34;&gt;See the jsFiddle.&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Check it out, our code now only goes one indentation deep (down from six). Within each success handler we return a promise for the next step, achieving the same result as passing a callback from within a callback. This promises chain also gives us a cleaner way to deal with errors: a failure from any promise will pass an error to the failure handler set in &lt;code&gt;fail()&lt;/code&gt; and stop the process.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;When I first encountered promises, I conceptualized the idea like this.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;&lt;span class=&#34;image&#34;&gt;&lt;img src=&#34;https://kalmas.net/img/explaining-promises-comic.jpg&#34; alt=&#34;Promises Comic&#34;&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_promising_asynchronicity&#34;&gt;Promising Asynchronicity&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;I think that the readability gain alone makes a strong case for using promises, but there is another important feature promises provide that can improve our code. Promises guarantee that the resolution of a function will be asynchronous. Consider the following code.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;var toPrint,
+sometimesAsync = function (shouldIBeAsync, callback) {
+    var message = &#39;an asynchronous &#34;hello!&#34;&#39;,
+        err = null;
+    if (shouldIBeAsync) {
+        setTimeout(function () {
+            callback(err, message);
+        }, 1000);
+    } else {
+        callback(err, message);
+    }
+};
+
+setTimeout(function () {
+    console.log(toPrint);
+}, 2000);
+
+sometimesAsync(true, function (err, message) {
+    toPrint = message;
+});
+
+toPrint = &#39;a synchronous &#34;hi&#34;&#39;;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;&lt;a href=&#34;http://jsfiddle.net/6L9DQ/6/&#34;&gt;See the jsFiddle.&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Try running the example with &lt;code&gt;shouldIBeAsync&lt;/code&gt; set to &lt;code&gt;false&lt;/code&gt;, you will see that the output changes. The reason is that &lt;code&gt;sometimesAsync&lt;/code&gt; may invoke its callback either immediately or asynchronously. The result is that when &lt;code&gt;shouldIBeAsync&lt;/code&gt; is &lt;code&gt;true&lt;/code&gt;, &lt;code&gt;toPrint&lt;/code&gt; is first set to &lt;code&gt;&#39;a synchronous &#34;hi&#34;&#39;&lt;/code&gt; and then changed to &lt;code&gt;&#39;an asynchronous &#34;hello!&#34;&#39;&lt;/code&gt; a second later. When &lt;code&gt;shouldIBeAsync&lt;/code&gt; is &lt;code&gt;false&lt;/code&gt;, &lt;code&gt;toPrint&lt;/code&gt; is first set to &#39;an asynchronous &#34;hello!&#34;&#39; (when &lt;code&gt;sometimesAsync&lt;/code&gt; is invoked) and then changed to &lt;code&gt;&#39;a synchronous &#34;hi&#34;&#39;&lt;/code&gt;. As you might imagine, this can cause problems. In fact this behavior is so troublesome it has been termed (hilariously) as &lt;a href=&#34;http://blog.izs.me/post/59142742143/designing-apis-for-asynchrony&#34;&gt;“releasing Zalgo”&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Let&amp;#8217;s look at the same code using promises.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-javascript&#34; data-lang=&#34;javascript&#34;&gt;var toPrint,
+sometimesAsync = function (shouldIBeAsync) {
+    var deferred = Q.defer(),
+        message = &#39;an asynchronous &#34;hello!&#34;&#39;,
+        err = null;
+    if (shouldIBeAsync) {
+        setTimeout(function () {
+            deferred.resolve(message);
+        }, 1000);
+    } else {
+        deferred.resolve(message);
+    }
+
+    return deferred.promise;
+};
+
+setTimeout(function () {
+    console.log(toPrint);
+}, 2000);
+
+sometimesAsync(true).then(function (message) {
+    toPrint = message;
+});
+
+toPrint = &#39;a synchronous &#34;hi&#34;&#39;;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;&lt;a href=&#34;http://jsfiddle.net/LK6Gv/1/&#34;&gt;See the jsFiddle.&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Now the output will always be the same, whether the function resolves synchronously or asynchronously. Thus promises give us a simple way to ensure that a sometimes asynchronous function is always asynchronous, and that Zalgo stays contained.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Promises provide a clever abstraction that can help make your code easier to read and reason about. The Q library makes using promises easy (I neglected to mention that it can even convert standard callback accepting functions into promise returning functions, it&amp;#8217;s pretty slick). If you&amp;#8217;re looking for a way to flatten your callback pile, give promises a try, they&amp;#8217;re addictive.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Dependency Injection 101</title>
+      <link>https://kalmas.net/blog/2014-01-14_dependency-injection-101/</link>
+      <pubDate>Tue, 14 Jan 2014 00:00:00 +0000</pubDate>
+      
+      <guid>https://kalmas.net/blog/2014-01-14_dependency-injection-101/</guid>
+      <description>&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Dependency injection is an incredible thing. Practicing it in your programming will make your code more reusable, readable, and, most importantly, testable.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;I read a quote the other day that I loved from Michael Feathers&#39; Working Effectively with Legacy Code, &#34;Legacy code is simply code without tests&#34;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;If you&amp;#8217;re not injecting your dependencies, you&amp;#8217;re not going to be able to test your code (or at least not test it in a sane way). It follows that if you&amp;#8217;re not injecting your dependencies, you&amp;#8217;re writing legacy code, and you don&amp;#8217;t want to be that guy, because you hate that guy and he makes your life miserable.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;But I&amp;#8217;m already ahead of myself. This is a 101 level course so let&amp;#8217;s start with the obvious: What is dependency injection? It&amp;#8217;s a programming pattern that aims to separate the responsibility of locating a resource from the class (or module) that uses it. Another term for this pattern is &#34;inversion of control.&#34; If we don&amp;#8217;t want a class looking up a resource (dependency) itself, then we&amp;#8217;ll need to pass it (inject) the resource we would like for it to use. Hence, &#34;dependency injection.&#34;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Of course, showing is better than telling, so let&amp;#8217;s build out an example:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_1_a_simple_script&#34;&gt;1. A Simple Script&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;We&amp;#8217;ll start with a simple script that models the bridge of a Starfleet vessel. You can grab the code yourself from Github.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;# Fetch example code
+git clone https://github.com/kalmas/DI-101.git
+cd DI-101
+git checkout -f step1&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Running &lt;code&gt;php example.php&lt;/code&gt; will echo out a command from our captain.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;$kirk = new Captain();
+echo $kirk-&amp;gt;issueCommand() . &#34;\n&#34;;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Now let&amp;#8217;s assume that our &lt;code&gt;issueCommand()&lt;/code&gt; method needs to log some information while it is running. Printing to the console meets our needs for right now. What&amp;#8217;s the fastest way to change our code to do this? The following would work.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;public function issueCommand() {
+	echo &#34;Captain&#39;s Log, Stardate {$this-&amp;gt;getStardate()}: {$this-&amp;gt;getEntry()}\n&#34;;
+	return $this-&amp;gt;getCommand();
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Now on the console you should get something like the following.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-txt&#34; data-lang=&#34;txt&#34;&gt;Captain&#39;s Log, Stardate 2456668.5984375: The Enterprise remains in standard orbit while we investigate the tragedy which has struck the away team. Lieutenant Marla Aster, ship&#39;s archaeologist, has been killed on what should have been a routine mission. Whatever the explanation, it will not bring back a valued and trusted officer.
+Make it so.&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Later, we decide we would prefer that the function log to a text file named &#34;captains.log.&#34; Easy enough, just hack out that echo.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;public function issueCommand() {
+	file_put_contents(&#39;captains.log&#39;,
+		&#34;Captain&#39;s Log, Stardate {$this-&amp;gt;getStardate()}: {$this-&amp;gt;getEntry()}\n&#34;, FILE_APPEND);
+	return $this-&amp;gt;getCommand();
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Even later, we decide that our application will need two captains, each one with different logging requirements. One captain will log to the console, while the other will write to a text file. One way we could meet this requirement is by making two different captain classes, but this of course would introduce duplicate code (something we would prefer to avoid). We could limit the amount of duplicate code by making the two types of captain that extend a single &lt;code&gt;Captain&lt;/code&gt; base class, but dependency injection gives us a cleaner solution.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_2_injecting_dependencies&#34;&gt;2. Injecting Dependencies&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Both implementations of &lt;code&gt;Captain&lt;/code&gt; depend on a logging resource, and both use that resource in a similar way, so lets inject that resource into the &lt;code&gt;Captain&lt;/code&gt; class. Our first step is to wrap both resources into classes with a common method, so we have created &lt;code&gt;Example\Log\Console&lt;/code&gt; and &lt;code&gt;Example\Log\File&lt;/code&gt;, both of which have a &lt;code&gt;println()&lt;/code&gt; method that will handle writing our output. Like a good cooking show host, I&amp;#8217;ve got the oven preheated and the gravy ready for the flavor injector.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;# Switch to version of code with some log classes added, dependencies ready for injection
+git checkout -f step2&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;To allow &lt;code&gt;Captain&lt;/code&gt; to use one of these classes we will add a constructor that allows us to assign &lt;code&gt;Captain&lt;/code&gt; a &lt;code&gt;$captainsLog&lt;/code&gt; property on instantiation.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;class Captain {
+	private $captainsLog;
+	public function __construct($log){
+		$this-&amp;gt;captainsLog = $log;
+	}
+	...&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;To use the log we add a call to &lt;code&gt;println()&lt;/code&gt; (common to both log implementations) to &lt;code&gt;issueCommand()&lt;/code&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;public function issueCommand() {
+	$this-&amp;gt;captainsLog-&amp;gt;println(&#34;Captain&#39;s Log, {$this-&amp;gt;getStardate()}&#34;, true);
+	$this-&amp;gt;captainsLog-&amp;gt;println($this-&amp;gt;getEntry());
+
+	return $this-&amp;gt;getCommand();
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Now all we need to do to make 2 (or 20) captains with different logging preferences is to instantiate each with the appropriate log class.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;$kirk = new Captain(new Console());
+$picard = new Captain(new File());&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_3_defining_an_interface&#34;&gt;3. Defining an Interface&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Dynamic languages like PHP make dependency injection a trivial task; as long as the object we inject has the method(s) that we&amp;#8217;re going to call attached to it, the code will run. PHP doesn&amp;#8217;t care what class my injected object belongs to as long as it can perform the tasks requested (see: &lt;a href=&#34;http://en.wikipedia.org/wiki/Duck_typing&#34;&gt;Duck Typing&lt;/a&gt;). However, while this freedom from inheritance makes for quick examples and prototypes, adding some rules around how an injected object will behave will help make our code more maintainable in the long run. To add these rules we will use an interface.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;# Switch to version of code with generic dependencies injected, ready to add an interface
+git checkout -f step3&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Our first step is to add an interface that defines the methods common to all of the injected objects. In the case of our logging classes, each share a single common method &lt;code&gt;println()&lt;/code&gt;. It is a convention to begin interface names with an &#34;I&#34;, we&amp;#8217;ll call our interface ILog.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;namespace Example\Log;
+
+interface ILog {
+	public function println($line, $emphasis);
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Once defined, we can tell our logging classes that they must adhere to the interface by using the &lt;code&gt;implements&lt;/code&gt; keyword.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;namespace Example\Log;
+use Example\Log\ILog;
+
+class Console implements ILog {
+	...&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;This guarantees that &lt;code&gt;Example\Log\Console&lt;/code&gt; provides a &lt;code&gt;println()&lt;/code&gt; method (if it doesn&amp;#8217;t PHP will error out when the class is loaded). Our last step is to enforce some type safety by adding type hinting to the &lt;code&gt;Captain&lt;/code&gt; constructor.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;class Captain {
+    /**
+     * @var ILog
+     */
+    private $captainsLog;
+    public function __construct(ILog $log){
+            $this-&amp;gt;captainsLog = $log;
+    }&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;This makes &lt;code&gt;__construct&lt;/code&gt; check that the injected &lt;code&gt;$log&lt;/code&gt; object belongs to the hinted class (or interface) and will cause an error if it doesn&amp;#8217;t. Conforming our injected dependencies to a well defined interface in this way has two primary benefits: it makes code easier to read and understand because the interface outlines exactly how a resource was designed to be used, and it makes code easier to safely modify, as PHP will loudly warn you if you have broken the contract set by the interface.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;sect1&#34;&gt;
+&lt;h2 id=&#34;_4_testing&#34;&gt;4. Testing&lt;/h2&gt;
+&lt;div class=&#34;sectionbody&#34;&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;So far we&amp;#8217;ve seen how dependency injection can help us write cleaner, easier to read code, that has less duplication and is easier to change. But we have yet to touch on how DI can make your tests better. Since that was the hook of the entire presentation, let&amp;#8217;s get down to it. We&amp;#8217;ll start with some test scaffolding for the &lt;code&gt;Captain&lt;/code&gt; class.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;# Switch to version of code with interface implemented and test scaffolding added, ready for test writing
+git checkout -f step4&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;We&amp;#8217;ll be using &lt;a href=&#34;http://phpunit.de/&#34;&gt;PHPUnit&lt;/a&gt; to run our tests. &lt;a href=&#34;http://phpunit.de/getting-started.html&#34;&gt;Installation is easy&lt;/a&gt;. In the new tests directory I&amp;#8217;ve added a phpunit.xml to tell PHPUnit how to run our tests. I&amp;#8217;ve also added our first test.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;use Example\Starfleet\Captain;
+use Example\Log\Console;
+
+class CaptainTest extends PHPUnit_Framework_TestCase {
+
+	public function test_issueCommand_returns_string() {
+		$cap = new Captain(new Console());
+		$command = $cap-&amp;gt;issueCommand();
+
+		$this-&amp;gt;assertInternalType(&#39;string&#39;, $command);
+	}
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;This tests that &lt;code&gt;issueCommand()&lt;/code&gt; returns a string. To run our test suite, do the following.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;# enter test dir
+cd tests
+# run all tests
+phpunit&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;But, oops, it fails. That&amp;#8217;s because when I added the test scaffolding I also snuck a change into our logging classes. Now &lt;code&gt;println()&lt;/code&gt; requires special environmental permissions that we (the dev user) don&amp;#8217;t have. This is a fairly common scenario; our dependencies are external resources that we can&amp;#8217;t always interact with the same way. Resources may require special permissions, touch sensitive data, or simply be unreliable. Dependency injection allows us to work around this issue by injecting different resources appropriate in different scenarios. In the case of testing we will want to inject resources that:&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;ulist&#34;&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Don&amp;#8217;t require any external input (which may be unreliable or unavailable)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Don&amp;#8217;t generate any external output (which is hard to test)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Respond as quickly as possible (to allow us to run our tests as frequently and as fast as possible)&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;PHPUnit provides a method for creating &#39;Mock Objects&#39; which meet all of the above requirements. Here&amp;#8217;s how we could get our test passing.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;public function test_issueCommand_returns_string(){
+	$mockLog = $this-&amp;gt;getMockBuilder(&#39;Example\Log\ILog&#39;)
+		-&amp;gt;setMethods(array(&#39;println&#39;))
+		-&amp;gt;getMock();
+
+	$cap = new Captain($mockLog);
+	$command = $cap-&amp;gt;issueCommand();
+
+	$this-&amp;gt;assertInternalType(&#39;string&#39;, $command);
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;The call to &lt;code&gt;getMockBuilder()&lt;/code&gt; provides a fluent interface that we can use to assign attributes to our mock object. We start with an empty mock class that can be passed around like an implementation of the ILog interface. Next, we tell the mock which methods will be called during this test using &lt;code&gt;setMethods()&lt;/code&gt;. Finally we call &lt;code&gt;getMock()&lt;/code&gt; to return the actual mock object to be injected.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;This gets us to a decent black box test, but we would like to go further and assert that our dependency is being used in the way that we expected. PHPUnit gives us a way to do this using the &lt;code&gt;expects()&lt;/code&gt; method of the mock object.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;public function test_issueCommand_returns_string(){
+	$mockLog = $this-&amp;gt;getMockBuilder(&#39;Example\Log\ILog&#39;)
+		-&amp;gt;setMethods(array(&#39;println&#39;))
+		-&amp;gt;getMock();
+	$mockLog-&amp;gt;expects($this-&amp;gt;at(0))
+		-&amp;gt;method(&#39;println&#39;)
+		-&amp;gt;with($this-&amp;gt;matchesRegularExpression(&#39;/Captain\&#39;s Log, Stardate [\d\.]+/&#39;), $this-&amp;gt;equalTo(true));
+	$mockLog-&amp;gt;expects($this-&amp;gt;at(1))
+		-&amp;gt;method(&#39;println&#39;)
+		-&amp;gt;with($this-&amp;gt;isType(&#39;string&#39;));
+
+	$cap = new Captain($mockLog);
+	$command = $cap-&amp;gt;issueCommand();
+
+	$this-&amp;gt;assertInternalType(&#39;string&#39;, $command);
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;This isn&amp;#8217;t the most straightforward example of testing mock expectations, but it does illustrate the flexibility PHPUnit can provide to maximize your test coverage. As you can see, we&amp;#8217;re calling &lt;code&gt;expects()&lt;/code&gt; twice to set an expectation for both calls made to the method &lt;code&gt;println()&lt;/code&gt; (the first: &lt;code&gt;$this&amp;#8594;at(0)&lt;/code&gt;, and the second: &lt;code&gt;$this&amp;#8594;at(1)&lt;/code&gt;). The &lt;code&gt;with()&lt;/code&gt; method allows us to describe the expected values of the parameters being passed to &lt;code&gt;println()&lt;/code&gt;. For the first call we expect to be printing the stardate, but we&amp;#8217;re not exactly sure what the stardate will be at the time the test is run, so we use a regular expression to check the string looks sane regardless of the actual time. We also expect that the first call will have a second parameter equal to &lt;code&gt;true&lt;/code&gt; so we add a second matcher to our call to &lt;code&gt;with()&lt;/code&gt;. For the second call, our only expectation is that &lt;code&gt;println&lt;/code&gt; will get called with a string, which we can assert with &lt;code&gt;with($this&amp;#8594;isType(&#39;string&#39;)&lt;/code&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;By using dependency injection and mock objects we&amp;#8217;ve gone from not being able to test our &lt;code&gt;Captain&lt;/code&gt; class at all to fairly complete test coverage, with relativity little effort. Better yet, the test is easy to run and understand, and depends on no environmental settings or automagic bootstrapping. A mock object may be taken one step further by using the &lt;code&gt;will()&lt;/code&gt; method to force the mock to return expected values (presumably to be used by assertions downstream), this modification is left as an exercise for the reader.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;# Switch to final version of code with first test complete
+git checkout -f step4a&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;&lt;em&gt;I wrote this post and the accompanying demo for a hands-on presentation. &lt;a href=&#34;https://kalmas.net/artifacts/di101_slides.html&#34;&gt;Here are the slides for that presentation.&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Hacking Scramble Squares</title>
+      <link>https://kalmas.net/blog/2014-01-01_scramble-squares/</link>
+      <pubDate>Wed, 01 Jan 2014 00:00:00 +0000</pubDate>
+      
+      <guid>https://kalmas.net/blog/2014-01-01_scramble-squares/</guid>
+      <description>&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;For his birthday, my dad received a puzzle from a family friend. The puzzle is called Scramble Squares® and the concept is simple: A player starts out with nine square pieces, each with a different design. Each piece has one of eight designs one each of its four sides, and these eight designs pair into four complete images. The version my dad received was dog themed (obviously), and so the four images on this puzzle were of a Yellow, Black, and Chocolate Lab and a Golden Retriever. To solve the puzzle, the pieces must be arranged into a three by three square, such that each one half of a dog on an inner side connects with a matching half.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Anyway, here&amp;#8217;s a picture of the unsolved puzzle, you&amp;#8217;ll get the idea.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;&lt;span class=&#34;image&#34;&gt;&lt;img src=&#34;https://kalmas.net/img/scramble-squares_unsolved.jpg&#34; alt=&#34;Unsolved Puzzle&#34;&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;The family friend got this for my dad because she knew that he would be frustrated by a puzzle, especially a seemingly simple one. I was similarly ensnared; with only nine pieces and eight different sides, how hard could it be to solve? Turns out, totally hard. After fumbling through some bad approaches on Christmas morning I realized that I wasn&amp;#8217;t going to get to the solution by accident. I would need a better strategy.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;As with most things, my strategy would be to cheat using a computer.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;The obvious approach is to use brute force: attempt each possible combination until I get to one that works. I did some napkin math to try to get a handle on how many possible combinations of pieces exist, and thus how many configurations I might need to try. Each of the nine pieces can be rotated to four different orientations.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;&lt;span class=&#34;image&#34;&gt;&lt;img src=&#34;https://kalmas.net/img/scramble-squares_rotation.jpg&#34; alt=&#34;Rotation Example&#34;&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;This gives us thirty-six playable &#34;pieces.&#34; So if the puzzle was to put a piece down on a table, there would be thirty-six different ways we could play it. If we needed to put down 2 pieces we have the original thirty-six options for the first piece, but only thirty-two (eight remaining pieces, each with four possible orientations) options for the second. This makes for 36 * 32 = 1,152 possible combinations that can be made with two pieces. It follows that if we need to play 9 pieces we have 36 * 32 * 28 * 24 * 20 * 16 * 12 * 8 * 4 = 95,126,814,720. We&amp;#8217;ll call it 100 billion.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;100 billion is a lot of combinations. For a sense of magnitude, let&amp;#8217;s assume that we can attempt 10,000 combinations per second: it will take us 115 days to try every combination.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Fortunately, to solve the puzzle we don&amp;#8217;t need to try every combination, just the ones that could potentially be a solution. For example, if we choose a random piece for position 1 and then another for position 2 and their touching designs don&amp;#8217;t match, we can lop an entire branch off of our possibility tree (in this case avoiding 82,575,360 useless attempts).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;I decided it was reasonable that a brute force approach might possibly work. Only thing left to it was to do it. So I did.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;My first step was to model the pieces, which I thought of as a collection of 4 designs, one facing each direction. A piece also has an &#34;origin,&#34; an identifier to link it to a physical piece (remember each physical piece can have four rotated representations), as well as a &#34;rotation.&#34; Inputing the data of my physical pieces ended up looking like the following.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;List&amp;lt;Piece&amp;gt; pieces = new ArrayList&amp;lt;Piece&amp;gt;();
+pieces.add(new Piece(&#34;A&#34;, 0, new Golden(Design.REAR),
+	new Black(Design.REAR),
+	new Yellow(Design.REAR),
+	new Chocolate(Design.REAR)));
+pieces.add(new Piece(&#34;B&#34;, 0, new Golden(Design.FRONT),
+	new Black(Design.FRONT),
+	new Yellow(Design.FRONT),
+	new Chocolate(Design.REAR)));
+pieces.add(new Piece(&#34;C&#34;, 0, new Chocolate(Design.FRONT),
+	new Golden(Design.FRONT),
+	new Yellow(Design.FRONT),
+	new Black(Design.REAR)));
+pieces.add(new Piece(&#34;D&#34;, 0, new Chocolate(Design.FRONT),
+	new Yellow(Design.REAR),
+	new Black(Design.FRONT),
+	new Golden(Design.FRONT)));
+pieces.add(new Piece(&#34;E&#34;, 0, new Golden(Design.REAR),
+	new Black(Design.FRONT),
+	new Yellow(Design.FRONT),
+	new Chocolate(Design.REAR)));
+pieces.add(new Piece(&#34;F&#34;, 0, new Golden(Design.FRONT),
+	new Black(Design.REAR),
+	new Yellow(Design.REAR),
+	new Chocolate(Design.FRONT)));
+pieces.add(new Piece(&#34;G&#34;, 0, new Yellow(Design.FRONT),
+	new Golden(Design.FRONT),
+	new Chocolate(Design.FRONT),
+	new Black(Design.FRONT)));
+pieces.add(new Piece(&#34;H&#34;, 0, new Golden(Design.FRONT),
+	new Black(Design.FRONT),
+	new Yellow(Design.REAR),
+	new Chocolate(Design.FRONT)));
+pieces.add(new Piece(&#34;I&#34;, 0, new Yellow(Design.FRONT),
+	new Black(Design.FRONT),
+	new Chocolate(Design.FRONT),
+	new Golden(Design.REAR)));&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;This gave me a collection of nine pieces, each of which I passed through a &#34;Rotator&#34; to generate the thirty-six potential pieces.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Next, I created a special collection called a PieceSequence to represent a group of pieces in play. Based on the pieces already inserted it could decide whether a given piece represented a feasible play for the next available position.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;public boolean pieceIsPlayable(Piece piece){
+	int count = pieces.size();
+	switch(count){
+		case 0:
+			// Anything can be played in the first position
+			return true;
+		case 1:
+		case 2:
+			// Second two positions must match piece to the left
+			return pieces.get(count - 1).canBeToTheWestOf(piece);
+		case 3:
+		case 6:
+			// Third and sixth positions must match piece above
+			return pieces.get(count - 3).canBeToTheNorthOf(piece);
+		default:
+			// Other positions must match the piece to the left and the piece above
+			return (pieces.get(count - 1).canBeToTheWestOf(piece)
+					&amp;amp;&amp;amp; pieces.get(count - 3).canBeToTheNorthOf(piece));
+	}
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Finally I wrote a play method to spin through all the possible combinations. Its logic is simple; identical to the work flow a very diligent monkey might apply to the same task.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;function play(playedSequence, playablePieces) {
+	foreach(playablePieces as piece) {
+		if(Piece Can Be Added To playedSequence) {
+			playedSequence.add(piece)
+			filteredPieces = Remove Pieces With Same Origin As piece From playablePieces
+			play(playedSequence, playablePieces)
+		}
+	}
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;My actual code ended up looking like the following.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;public PieceSequence play(PieceSequence currentSeq, List&amp;lt;Piece&amp;gt; playablePieces) {
+	for(int i = 0; i &amp;lt; playablePieces.size(); i++){
+		tries++;
+		Piece pieceToPlay = playablePieces.get(i);
+		if(currentSeq.pieceIsPlayable(pieceToPlay)){
+			List&amp;lt;Piece&amp;gt; filteredList = removePiecesWithSameOrigin(playablePieces, pieceToPlay.getOrigin());
+			PieceSequence newSeq = new PieceSequence(currentSeq);
+			newSeq.add(pieceToPlay);
+			if(newSeq.size() == 9){
+				return newSeq;
+			} else {
+				PieceSequence result = play(newSeq, filteredList);
+				if(result != null){
+					return result;
+				}
+			}
+		}
+	}
+
+	// Whelp, this was a dead end
+	return null;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Uh, that&amp;#8217;s pretty much it. Once I managed to get my code to compile, out came an answer. Much faster than I expected it would.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;listingblock&#34;&gt;
+&lt;div class=&#34;content&#34;&gt;
+&lt;pre class=&#34;highlight&#34;&gt;&lt;code class=&#34;language-txt&#34; data-lang=&#34;txt&#34;&gt;Solved it in 14411 tries:
+   Y1
+    _
+B1 | | C2    B2
+    -
+   G1
+
+   G1
+    _
+C1 | | Y1    C3
+    -
+   B2
+
+   C1
+    _
+Y2 | | G1    H1
+    -
+   B1
+
+   G2
+    _
+C1 | | Y1    I1
+    -
+   B1
+
+   B1
+    _
+Y2 | | G1    D2
+    -
+   C1
+
+   B2
+    _
+G2 | | Y2    A3
+    -
+   C2
+
+   B2
+    _
+G1 | | Y2    F3
+    -
+   C1
+
+   C2
+    _
+Y1 | | G2    E1
+    -
+   B1
+
+   C1
+    _
+G1 | | B1    G2
+    -
+   Y1&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;14,411 tries is quite a bit smaller than the 100 billion possible combinations. It&amp;#8217;s more than I would try on a table, but not enough to take my computer more than a second. The relatively low number surprised me, and makes suspect that there is more than one winning combinations (contrary to the packagings description). I&amp;#8217;d like to test this, but maybe in another post.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;The code I wrote for this is on github &lt;a href=&#34;https://github.com/kalmas/squares-hack&#34;&gt;https://github.com/kalmas/squares-hack&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;Finally, here&amp;#8217;s the solved puzzle. Spoiler alert&amp;#8230;&amp;#8203;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;paragraph&#34;&gt;
+&lt;p&gt;&lt;span class=&#34;image&#34;&gt;&lt;img src=&#34;https://kalmas.net/img/scramble-squares_solved.jpg&#34; alt=&#34;Solved&#34;&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
