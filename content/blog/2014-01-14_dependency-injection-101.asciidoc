@@ -1,0 +1,251 @@
++++
+title = "Dependency Injection 101"
+date = "2014-01-14"
++++
+
+Dependency injection is an incredible thing. Practicing it in your programming will make your code more reusable, readable, and, most importantly, testable.
+
+I read a quote the other day that I loved from Michael Feathers' Working Effectively with Legacy Code, "Legacy code is simply code without tests".
+
+If you're not injecting your dependencies, you're not going to be able to test your code (or at least not test it in a sane way). It follows that if you're not injecting your dependencies, you're writing legacy code, and you don't want to be that guy, because you hate that guy and he makes your life miserable.
+
+But I'm already ahead of myself. This is a 101 level course so let's start with the obvious: What is dependency injection? It's a programming pattern that aims to separate the responsibility of locating a resource from the class (or module) that uses it. Another term for this pattern is "inversion of control." If we don't want a class looking up a resource (dependency) itself, then we'll need to pass it (inject) the resource we would like for it to use. Hence, "dependency injection."
+
+Of course, showing is better than telling, so let's build out an example:
+
+== 1. A Simple Script ==
+
+We'll start with a simple script that models the bridge of a Starfleet vessel. You can grab the code yourself from Github.
+
+[source,sh]
+----
+# Fetch example code
+git clone https://github.com/kalmas/DI-101.git
+cd DI-101
+git checkout -f step1
+----
+
+Running `php example.php` will echo out a command from our captain.
+
+[source,php]
+----
+$kirk = new Captain();
+echo $kirk->issueCommand() . "\n";
+----
+
+Now let's assume that our `issueCommand()` method needs to log some information while it is running. Printing to the console meets our needs for right now. What's the fastest way to change our code to do this? The following would work.
+
+[source,php]
+----
+public function issueCommand() {
+	echo "Captain's Log, Stardate {$this->getStardate()}: {$this->getEntry()}\n";
+	return $this->getCommand();
+}
+----
+
+Now on the console you should get something like the following.
+
+[source,txt]
+----
+Captain's Log, Stardate 2456668.5984375: The Enterprise remains in standard orbit while we investigate the tragedy which has struck the away team. Lieutenant Marla Aster, ship's archaeologist, has been killed on what should have been a routine mission. Whatever the explanation, it will not bring back a valued and trusted officer.
+Make it so.
+----
+
+Later, we decide we would prefer that the function log to a text file named "captains.log." Easy enough, just hack out that echo.
+
+[source,php]
+----
+public function issueCommand() {
+	file_put_contents('captains.log',
+		"Captain's Log, Stardate {$this->getStardate()}: {$this->getEntry()}\n", FILE_APPEND);
+	return $this->getCommand();
+}
+----
+
+Even later, we decide that our application will need two captains, each one with different logging requirements. One captain will log to the console, while the other will write to a text file. One way we could meet this requirement is by making two different captain classes, but this of course would introduce duplicate code (something we would prefer to avoid). We could limit the amount of duplicate code by making the two types of captain that extend a single `Captain` base class, but dependency injection gives us a cleaner solution.
+
+== 2. Injecting Dependencies ==
+
+Both implementations of `Captain` depend on a logging resource, and both use that resource in a similar way, so lets inject that resource into the `Captain` class. Our first step is to wrap both resources into classes with a common method, so we have created `Example\Log\Console` and `Example\Log\File`, both of which have a `println()` method that will handle writing our output. Like a good cooking show host, I've got the oven preheated and the gravy ready for the flavor injector.
+
+[source,sh]
+----
+# Switch to version of code with some log classes added, dependencies ready for injection
+git checkout -f step2
+----
+
+To allow `Captain` to use one of these classes we will add a constructor that allows us to assign `Captain` a `$captainsLog` property on instantiation.
+
+[source,php]
+----
+class Captain {
+	private $captainsLog;
+	public function __construct($log){
+		$this->captainsLog = $log;
+	}
+	...
+----
+
+To use the log we add a call to `println()` (common to both log implementations) to `issueCommand()`.
+
+[source,php]
+----
+public function issueCommand() {
+	$this->captainsLog->println("Captain's Log, {$this->getStardate()}", true);
+	$this->captainsLog->println($this->getEntry());
+
+	return $this->getCommand();
+}
+----
+
+Now all we need to do to make 2 (or 20) captains with different logging preferences is to instantiate each with the appropriate log class.
+
+[source,php]
+----
+$kirk = new Captain(new Console());
+$picard = new Captain(new File());
+----
+
+== 3. Defining an Interface ==
+
+Dynamic languages like PHP make dependency injection a trivial task; as long as the object we inject has the method(s) that we're going to call attached to it, the code will run. PHP doesn't care what class my injected object belongs to as long as it can perform the tasks requested (see: http://en.wikipedia.org/wiki/Duck_typing[Duck Typing]). However, while this freedom from inheritance makes for quick examples and prototypes, adding some rules around how an injected object will behave will help make our code more maintainable in the long run. To add these rules we will use an interface.
+
+[source,sh]
+----
+# Switch to version of code with generic dependencies injected, ready to add an interface
+git checkout -f step3
+----
+
+Our first step is to add an interface that defines the methods common to all of the injected objects. In the case of our logging classes, each share a single common method `println()`. It is a convention to begin interface names with an "I", we'll call our interface ILog.
+
+[source,php]
+----
+namespace Example\Log;
+
+interface ILog {
+	public function println($line, $emphasis);
+}
+----
+
+Once defined, we can tell our logging classes that they must adhere to the interface by using the `implements` keyword.
+
+[source,php]
+----
+namespace Example\Log;
+use Example\Log\ILog;
+
+class Console implements ILog {
+	...
+----
+
+This guarantees that `Example\Log\Console` provides a `println()` method (if it doesn't PHP will error out when the class is loaded). Our last step is to enforce some type safety by adding type hinting to the `Captain` constructor.
+
+[source,php]
+----
+class Captain {
+    /**
+     * @var ILog
+     */
+    private $captainsLog;
+    public function __construct(ILog $log){
+            $this->captainsLog = $log;
+    }
+----
+
+This makes `__construct` check that the injected `$log` object belongs to the hinted class (or interface) and will cause an error if it doesn't. Conforming our injected dependencies to a well defined interface in this way has two primary benefits: it makes code easier to read and understand because the interface outlines exactly how a resource was designed to be used, and it makes code easier to safely modify, as PHP will loudly warn you if you have broken the contract set by the interface.
+
+== 4. Testing ==
+
+So far we've seen how dependency injection can help us write cleaner, easier to read code, that has less duplication and is easier to change. But we have yet to touch on how DI can make your tests better. Since that was the hook of the entire presentation, let's get down to it. We'll start with some test scaffolding for the `Captain` class.
+
+[source,sh]
+----
+# Switch to version of code with interface implemented and test scaffolding added, ready for test writing
+git checkout -f step4
+----
+
+We'll be using http://phpunit.de/[PHPUnit] to run our tests. http://phpunit.de/getting-started.html[Installation is easy]. In the new tests directory I've added a phpunit.xml to tell PHPUnit how to run our tests. I've also added our first test.
+
+[source,php]
+----
+use Example\Starfleet\Captain;
+use Example\Log\Console;
+
+class CaptainTest extends PHPUnit_Framework_TestCase {
+
+	public function test_issueCommand_returns_string() {
+		$cap = new Captain(new Console());
+		$command = $cap->issueCommand();
+
+		$this->assertInternalType('string', $command);
+	}
+}
+----
+
+This tests that `issueCommand()` returns a string. To run our test suite, do the following.
+
+[source,sh]
+----
+# enter test dir
+cd tests
+# run all tests
+phpunit
+----
+
+But, oops, it fails. That's because when I added the test scaffolding I also snuck a change into our logging classes. Now `println()` requires special environmental permissions that we (the dev user) don't have. This is a fairly common scenario; our dependencies are external resources that we can't always interact with the same way. Resources may require special permissions, touch sensitive data, or simply be unreliable. Dependency injection allows us to work around this issue by injecting different resources appropriate in different scenarios. In the case of testing we will want to inject resources that:
+
+* Don't require any external input (which may be unreliable or unavailable)
+* Don't generate any external output (which is hard to test)
+* Respond as quickly as possible (to allow us to run our tests as frequently and as fast as possible)
+
+PHPUnit provides a method for creating 'Mock Objects' which meet all of the above requirements. Here's how we could get our test passing.
+
+[source,php]
+----
+public function test_issueCommand_returns_string(){
+	$mockLog = $this->getMockBuilder('Example\Log\ILog')
+		->setMethods(array('println'))
+		->getMock();
+
+	$cap = new Captain($mockLog);
+	$command = $cap->issueCommand();
+
+	$this->assertInternalType('string', $command);
+}
+----
+
+The call to `getMockBuilder()` provides a fluent interface that we can use to assign attributes to our mock object. We start with an empty mock class that can be passed around like an implementation of the ILog interface. Next, we tell the mock which methods will be called during this test using `setMethods()`. Finally we call `getMock()` to return the actual mock object to be injected.
+
+This gets us to a decent black box test, but we would like to go further and assert that our dependency is being used in the way that we expected. PHPUnit gives us a way to do this using the `expects()` method of the mock object.
+
+[source,php]
+----
+public function test_issueCommand_returns_string(){
+	$mockLog = $this->getMockBuilder('Example\Log\ILog')
+		->setMethods(array('println'))
+		->getMock();
+	$mockLog->expects($this->at(0))
+		->method('println')
+		->with($this->matchesRegularExpression('/Captain\'s Log, Stardate [\d\.]+/'), $this->equalTo(true));
+	$mockLog->expects($this->at(1))
+		->method('println')
+		->with($this->isType('string'));
+
+	$cap = new Captain($mockLog);
+	$command = $cap->issueCommand();
+
+	$this->assertInternalType('string', $command);
+}
+----
+
+This isn't the most straightforward example of testing mock expectations, but it does illustrate the flexibility PHPUnit can provide to maximize your test coverage. As you can see, we're calling `expects()` twice to set an expectation for both calls made to the method `println()` (the first: `$this->at(0)`, and the second: `$this->at(1)`). The `with()` method allows us to describe the expected values of the parameters being passed to `println()`. For the first call we expect to be printing the stardate, but we're not exactly sure what the stardate will be at the time the test is run, so we use a regular expression to check the string looks sane regardless of the actual time. We also expect that the first call will have a second parameter equal to `true` so we add a second matcher to our call to `with()`. For the second call, our only expectation is that `println` will get called with a string, which we can assert with `with($this->isType('string')`
+
+By using dependency injection and mock objects we've gone from not being able to test our `Captain` class at all to fairly complete test coverage, with relativity little effort. Better yet, the test is easy to run and understand, and depends on no environmental settings or automagic bootstrapping. A mock object may be taken one step further by using the `will()` method to force the mock to return expected values (presumably to be used by assertions downstream), this modification is left as an exercise for the reader.
+
+[source,sh]
+----
+# Switch to final version of code with first test complete
+git checkout -f step4a
+----
+
+_I wrote this post and the accompanying demo for a hands-on presentation. link:/artifacts/di101_slides.html[Here are the slides for that presentation.]_

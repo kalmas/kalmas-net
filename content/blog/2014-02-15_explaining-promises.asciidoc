@@ -1,0 +1,278 @@
++++
+title = "Explaining Promises"
+date = "2014-02-15"
++++
+
+I've been working with node a lot recently, and as a result I've been reading a lot about managing asynchronous code. I've found that I particularly enjoy using the promises pattern, but I haven't yet taken the time to step back and fully contemplate how (if) it is benefiting my code. So, I've decided to write a post explaining the basic usage  of promises, as a thought exercise for myself and hopefully as a useful guide for someone new to the concept. Here goes...
+
+We'll start by looking at a simple piece of asynchronous code.
+
+[source,js]
+----
+var asyncGetMessage = function (callback) {
+    var message = 'an asynchronous "hello!"',
+        err = null;
+    setTimeout(function () {
+        callback(err, message);
+    }, 1000);
+};
+
+asyncGetMessage(function (err, message) {
+    if(err) {
+        throw new Error('whoops');
+    } else {
+        console.log(message);
+    }
+});
+
+console.log('a synchronous "hi"');
+----
+
+http://jsfiddle.net/kalmas/x2Q4y/11/[See the jsFiddle.]
+
+The example is obviously contrived (the `asyncGetMessage` function is only asynchronous because `setTimeout` is used to explicitly delay the response), but it illustrates a pattern thats common in javascript: a function that will return a result eventually is given a callback function containing code to be run once the result is available. In this example, the callback takes a message parameter and prints it out with `console.log`. Because the callback isn't invoked until after 1000 milliseconds have passed, we see the second call to `console.log` (`console.log('a synchronous "hi"');`) execute first, followed by the call in the callback function shortly after.
+
+Ok, so there's no problem with the code above. It's readable and concise, and I'd probably argue that refactoring to use promises would be overkill. But let's take our example one step further.
+
+[source,js]
+----
+var asyncGetMessage = function (callback) {
+    var message = 'an asynchronous "hello!"',
+        err = null;
+    setTimeout(function () {
+        callback(err, message);
+    }, 1000);
+};
+
+var asyncCapitalize = function (input, callback) {
+    var message = input.toUpperCase(),
+        err = null;
+    setTimeout(function () {
+        callback(err, message);
+    }, 1000);
+};
+
+var asyncPrint = function (input, callback) {
+    var err = null;
+    setTimeout(function () {
+        console.log(input);
+        callback(err);
+    }, 1000);
+};
+
+asyncGetMessage(function (err, message) {
+    if (err) {
+        throw new Error('an error here');
+    } else {
+        asyncCapitalize(message, function (err, message) {
+            if (err) {
+                throw new Error('an error there');
+            } else {
+                asyncPrint(message, function (err) {
+                    if (err) {
+                        throw new Error('everywhere an error error');
+                    } else {
+                        console.log('finally done.');
+                    }
+                });
+            }
+        });
+    }
+});
+
+console.log('a synchronous "hi"');
+----
+
+http://jsfiddle.net/kalmas/vpVgX/1/[See the jsFiddle.]
+
+The above is a logical progression of our example (or as logical as we can be about useless code). Now when we get the result back from `asyncGetMessage` we pass the result to another asynchronous function, `asyncCaptialize`, which in turn sends its result to `asyncPrint`, finally we notify the console that everything is done.
+
+Each step is preformed by means of a function handed into the preceding function. The result is a pile of callbacks nested 3 layers deep. Even though our process is trivial, the asynchronous nature of our functions compounds the complexity of our program at every step. As the callbacks are nested deeper and deeper they become more difficult to read, to work on, and to understand. This is the point at which promises can help us improve our code.
+
+A promise flips the idea of a callback upside down: instead of sending a piece of code to be evaluated after resolution into a function, the function returns an object with the ability to alert the calling context when resolution occurs. The returned object is called a promise because it represents a promise to provide a value when (and if) it becomes available.
+
+Let's look at our first piece of code rewritten to use promises.
+
+[source,js]
+----
+var Q = require('q');
+
+var consoleLine = "<p class=\"console-line\"></p>";
+console = {
+    log: function (text) {
+        $("#console-log").append($(consoleLine).html(text));
+    }
+};
+
+var asyncGetMessage = function () {
+    var deferred = Q.defer(),
+        message = 'an asynchronous "hello!"',
+        err = null;
+    setTimeout(function () {
+        if (err) {
+            deferred.reject(err);
+        } else {
+            deferred.resolve(message);
+        }
+    }, 1000);
+
+    return deferred.promise;
+};
+
+var promiseToGetMessage = asyncGetMessage();
+promiseToGetMessage.then(function (message) {
+    console.log(message);
+}, function (err) {
+    console.log('Error! ' + err)
+});
+
+console.log('a synchronous "hi"');
+----
+
+http://jsfiddle.net/a5TdL/2/[See the jsFiddle.]
+
+Now `asyncGetMessage` returns a promise, care of https://github.com/kriskowal/q[the super-fantastic Q library]. The promise provides a `then` method which accepts 2 handler functions. The first gets called with the message on success, the second with an error on failure. This looks a bit cleaner than our first example (to me anyway), but when callbacks start to stack up, promises really shine.
+
+[source,javascript]
+----
+var Q = require('q');
+
+var asyncGetMessage = function () {
+    var deferred = Q.defer(),
+        message = 'an asynchronous "hello!"',
+        err = null;
+    setTimeout(function () {
+        if (err) {
+            deferred.reject(err);
+        } else {
+            deferred.resolve(message);
+        }
+    }, 1000);
+
+    return deferred.promise;
+};
+
+var asyncCapitalize = function (input) {
+    var deferred = Q.defer(),
+        message = input.toUpperCase(),
+        err = null;
+    setTimeout(function () {
+        if (err) {
+            deferred.reject(err);
+        } else {
+            deferred.resolve(message);
+        }
+    }, 1000);
+
+    return deferred.promise;
+};
+
+var asyncPrint = function (input, callback) {
+    var deferred = Q.defer(),
+        err = null;
+    setTimeout(function () {
+        console.log(input);
+        if (err) {
+            deferred.reject(err);
+        } else {
+            deferred.resolve();
+        }
+    }, 1000);
+
+    return deferred.promise;
+};
+
+var promiseToGetMessage = asyncGetMessage();
+promiseToGetMessage.then(function (message) {
+    var promiseToCaptializeMessage = asyncCapitalize(message);
+    return promiseToCaptializeMessage;
+}).then(function (message) {
+    var promiseToPrintMessage = asyncPrint(message);
+    return promiseToPrintMessage;
+}).then(function () {
+    console.log('finally done');
+}).fail(function (err) {
+    console.log('something went horribly wrong!! ' + err);
+});
+
+console.log('a synchronous "hi"');
+----
+
+http://jsfiddle.net/2E8Ts/3/[See the jsFiddle.]
+
+Check it out, our code now only goes one indentation deep (down from six). Within each success handler we return a promise for the next step, achieving the same result as passing a callback from within a callback. This promises chain also gives us a cleaner way to deal with errors: a failure from any promise will pass an error to the failure handler set in `fail()` and stop the process.
+
+When I first encountered promises, I conceptualized the idea like this.
+
+image:/img/explaining-promises-comic.jpg[Promises Comic]
+
+== Promising Asynchronicity ==
+
+I think that the readability gain alone makes a strong case for using promises, but there is another important feature promises provide that can improve our code. Promises guarantee that the resolution of a function will be asynchronous. Consider the following code.
+
+[source,javascript]
+----
+var toPrint,
+sometimesAsync = function (shouldIBeAsync, callback) {
+    var message = 'an asynchronous "hello!"',
+        err = null;
+    if (shouldIBeAsync) {
+        setTimeout(function () {
+            callback(err, message);
+        }, 1000);
+    } else {
+        callback(err, message);
+    }
+};
+
+setTimeout(function () {
+    console.log(toPrint);
+}, 2000);
+
+sometimesAsync(true, function (err, message) {
+    toPrint = message;
+});
+
+toPrint = 'a synchronous "hi"';
+----
+
+http://jsfiddle.net/6L9DQ/6/[See the jsFiddle.]
+
+Try running the example with `shouldIBeAsync` set to `false`, you will see that the output changes. The reason is that `sometimesAsync` may invoke its callback either immediately or asynchronously. The result is that when `shouldIBeAsync` is `true`, `toPrint` is first set to `'a synchronous "hi"'` and then changed to `'an asynchronous "hello!"'` a second later. When `shouldIBeAsync` is `false`, `toPrint` is first set to 'an asynchronous "hello!"' (when `sometimesAsync` is invoked) and then changed to `'a synchronous "hi"'`. As you might imagine, this can cause problems. In fact this behavior is so troublesome it has been termed (hilariously) as http://blog.izs.me/post/59142742143/designing-apis-for-asynchrony[“releasing Zalgo”].
+
+Let's look at the same code using promises.
+
+[source,javascript]
+----
+var toPrint,
+sometimesAsync = function (shouldIBeAsync) {
+    var deferred = Q.defer(),
+        message = 'an asynchronous "hello!"',
+        err = null;
+    if (shouldIBeAsync) {
+        setTimeout(function () {
+            deferred.resolve(message);
+        }, 1000);
+    } else {
+        deferred.resolve(message);
+    }
+
+    return deferred.promise;
+};
+
+setTimeout(function () {
+    console.log(toPrint);
+}, 2000);
+
+sometimesAsync(true).then(function (message) {
+    toPrint = message;
+});
+
+toPrint = 'a synchronous "hi"';
+----
+
+http://jsfiddle.net/LK6Gv/1/[See the jsFiddle.]
+
+Now the output will always be the same, whether the function resolves synchronously or asynchronously. Thus promises give us a simple way to ensure that a sometimes asynchronous function is always asynchronous, and that Zalgo stays contained.
+
+Promises provide a clever abstraction that can help make your code easier to read and reason about. The Q library makes using promises easy (I neglected to mention that it can even convert standard callback accepting functions into promise returning functions, it's pretty slick). If you're looking for a way to flatten your callback pile, give promises a try, they're addictive.

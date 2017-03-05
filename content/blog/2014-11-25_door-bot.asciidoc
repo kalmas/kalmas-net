@@ -1,0 +1,173 @@
++++
+title = "Door Bot"
+date = "2014-11-25"
++++
+
+For a good long while (2 whole years according to Github commits 😩), my buddy Cody and I have been hacking on an automatic door lock for the front door of his house. We've gone through a handful of iterations and dead-ends (the most painful of which involved attempting to write a REST webservice for the Arduino Ethernet Shield), but a few days ago we finally finished. I'm ready to put this project to bed and move on to building *real* robots (the walking, talking, terminating kind). So to wrap things up, here's a blog post...
+
+https://www.instagram.com/p/vcaZWJMZc4/[But first an adorable video!]
+
+== Version 0 ==
+
+To explain our project, I'll begin with the first iteration of what I will refer to, lovingly, as DoorBot (™ pending). The first DoorBot was something Cody hacked together over a few days: an http://arduino.cc/en/Main/arduinoBoardUno[Arduino Uno] connected to a http://www.amazon.com/Black-Plastic-Weigand-Proximity-Reader/dp/B00AUB2RQ4/ref=sr_1_3?ie=UTF8&qid=1416784413[Arduino Uno] and a http://www.amazon.com/Generic-Secure-Electric-Strike-Control/dp/B00JWDE98K/ref=sr_1_4?s=electronics&ie=UTF8&qid=1416784606[resting closed electric door lock].
+
+It worked like this:
+
+1. A RFID card is swiped past the card reader.
+2. The Arduino receives a string of bytes containing the card's passcode.
+3. If the code is found in a hardcoded list, a pin on the Arduino is turned on for 2 seconds, opening the electric lock.
+
+The code wasn't pretty and the wiring was slapdash (Cody pointed out that the 2 second open time was convenient because a duration much longer would present a risk of fire), but it worked, reliably and without maintenance, for over two years.
+
+== If It Ain't Broke, Fix It ==
+
+I decided a necessary enhancement was connecting DoorBot to the Internet. Half of my motivation was to use the project as a learning exercise to better understand the path from solenoid to HTTP. The other half was a desire to bring the logic up to a level where I could use my skill set; several days of compiling http://arduino.cc/en/Reference/HomePage[weird code] to run inside a http://stackoverflow.com/questions/7225693/how-do-you-debug-arduino-code-running-on-arduino-hardware[black box of un-debuggable-ness] had me feeling pretty unproductive.
+
+Cody and I planned to build a simple website that could be used to remotely open the lock. This would be a good learning experience for both of us, and would satisfy the real world use cases of:
+
+* Opening the door without a card (or key).
+* Opening the door for someone without going downstairs.
+
+Should be pretty simple I thought. We would be done in a week.
+
+== Version 1 (2 Years Later) ==
+
+Our latest, working, iteration was completed on November 6th (I almost finished this blog post the same week... alas). It provides the same RFID card reading functionality as Version 0, and adds a one button website to open the door. To accomplish this we ended up adding a http://www.amazon.com/Raspberry-Pi-Model-512MB-Computer/dp/B00LPESRUK[Raspberry Pi] to the DoorBot. Leaving us with an *only slightly* overkill design.
+
+image:/img/door-bot.png[Door Bot Diagram]
+
+The web portion of the system works like this:
+
+1. The Pi serves a website over Wi-Fi.
+2. When the button is clicked, an open signal is sent over USB to the Arduino.
+3. A signal interrupts the main RFID card reading loop and opens the lock.
+
+=== On The Arduino ===
+
+The code on the Arduino runs a continuous loop that does 2 things.
+
+First, it checks the RFID sensor for input, reads that input a valid passcode, and maybe opens the door.
+
+[source,c]
+----
+/**
+ * Read from RFID
+ */
+if (mySerial.available()) {
+
+    Serial.write("Incoming\n");
+    while(tagIndex < 13) {
+        if (mySerial.available()) {
+            int readByte = mySerial.read();
+
+            if (readByte != 2 && readByte != 10 && readByte != 13) {
+                tagString[tagIndex] = readByte;
+                tagIndex = tagIndex + 1;
+            }
+        }
+    }
+
+    Serial.write("Tag: ");
+    Serial.write(tagString);
+    Serial.write("\n");
+
+    if (isAllowed(tagString)) {
+        Serial.write("Open Sesame!");
+        digitalWrite(lockPin, HIGH);
+        delay(2000);
+        digitalWrite(lockPin, LOW);
+    } else {
+        Serial.write("Sry, Not Allowed :(");
+    }
+
+}
+----
+
+Second, it listens for an "open" signal sent from the Raspberry Pi.
+
+[source,c]
+----
+/**
+ * Control lock
+ */
+if (Serial.available()) {
+    int incomingByte = Serial.read();
+
+    if (incomingByte == 0x01) {
+        digitalWrite(lockPin, HIGH);
+    } else if (incomingByte == 0x00) {
+        digitalWrite(lockPin, LOW);
+    }
+}
+----
+
+One complication that we ran into was this: by default the Arduino uses the a specific pin (pin 1, I think?) to read serial input using its built in http://arduino.cc/en/reference/serial[Serial] library, but Serial is also listening to the USB port for input. This means that if you want communication over USB, you can't use Serial to read from the default serial pin at the same time; the streams cross and nothing works. The workaround comes in the form of the http://arduino.cc/en/Reference/softwareSerial[SoftwareSerial] library which allows you to reproduce the functionality of Serial using an arbitrary input and output pin. This is why in the code above there are references to both mySerial (connected to the RFID reader) and Serial (connected to the Pi). You can see how these two references are initialized along with the rest of the script here: https://github.com/kalmas/web-door/blob/master/micro_door/micro_door.ino
+
+=== On The Pi ===
+
+The Pi is responsible for serving the website. We brought the Pi into the mix after realizing that coding an HTTP interface for the Arduino is a job for masochists. In contrast, on the Pi we can just write a few lines of JavaScript and call it a day. Case in point, here's most of the application code required to pass web requests through to the Arduino.
+
+[source,js]
+----
+var usb = '/dev/ttyACM0';
+
+var express = require('express');
+var router = express.Router();
+var serialport = require('serialport');
+var SerialPort = serialport.SerialPort;
+var serial = new SerialPort(usb, {
+    baudrate: 9600,
+    parser: serialport.parsers.readline("\n")
+});
+
+// Close the lock.
+var close = function() {
+    serial.write(new Buffer([0x00]));
+};
+
+// Open the lock.
+var open = function() {
+    serial.write(new Buffer([0x01]));
+};
+
+router.get('/', function(req, res) {
+    res.render('index', { title: 'Who Dat?' });
+});
+
+// Open the lock then close it 2 seconds later.
+router.post('/open', function(req, res) {
+    res.send();
+    open();
+    setTimeout(close, 2000);
+});
+
+module.exports = router;
+----
+
+The heavy lifting here is done by https://github.com/strongloop/expressjs.com[express] and https://github.com/voodootikigod/node-serialport[node-serialport]. node-serialport is pretty slick and I can't wait to use it for future robotics projects. Just provide it a USB port address and a baud rate and you're ready to talk to any piece of hardware.
+
+To get the Pi connected to the network we installed an http://www.amazon.com/Edimax-EW-7811Un-150Mbps-Raspberry-Supports/dp/B003MTTJOY/ref=pd_bxgy_pc_img_y[outrageously cheap USB Wi-Fi dongle] using these easy setup instructions http://kerneldriver.wordpress.com/2012/10/21/configuring-wpa2-using-wpa_supplicant-on-the-raspberry-pi/.
+
+To make the server run as a service on boot, we added to the `/etc/rc.local.sh`
+
+[source,sh]
+----
+su web -c '/bin/sh /home/pi/web-door/node-door/start.sh < /dev/null &'
+----
+
+And made a `start.sh` to start the node server.
+
+[source,sh]
+----
+#!/bin/bash
+
+/usr/bin/sudo /usr/local/bin/node /home/pi/web-door/node-door/app.js
+----
+
+=== Finished Product ===
+
+The final product works remarkably well. Connecting to the network and pulling up the website is easily done on the way up the driveway. I've encounted a few unexplained server outages, but in these cases I can just fall back to using my RFID card (which always works like a champ). This is my first experience writing code that makes stuff physically move, and it really makes me feel like a magician.
+
+See the full code https://github.com/kalmas/web-door[here]. See the door itself on the front of Cody's house.
+
+

@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <title>How This Blog Works | kalmas.net</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+
+  <link href="https://fonts.googleapis.com/css?family=Cinzel|Ubuntu+Mono|Lora" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://kalmas.net/css/reset.css">
+  <link rel="stylesheet" href="https://kalmas.net/css/style.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/hopscotch.min.css" />
+</head>
+<body>
+
+<section class="section">
+  <div class="container">
+    <nav class="margin-bottom-lg">
+      <h1 class="site-title mono"><a class="no-dec" href="https://kalmas.net">kalmas.net</a></h1>
+      <ul id="links">
+        <li><a class="mono" href="/blog">Blog</a></li>
+        <li><a class="mono" href="https://github.com/kalmas">GitHub</a></li>
+        <li><a class="mono" href="https://github.com/kalmas/resume">Resume</a></li>
+      </ul>
+    </nav>
+  </div>
+</section>
+
+<section class="section margin-bottom-xlg">
+  <div class="container">
+    <h2 class="size-medium grey">August 25, 2014</h2>
+    <h1>How This Blog Works</h1>
+    <div class="content">
+      <div class="paragraph">
+<p><em>[This is an article about how my blog <strong>used</strong> to work. Today it uses <a href="https://gohugo.io/">Hugo</a>. I&#8217;ll write a post about the current set up one day&#8230;&#8203; it&#8217;s much simpler.]</em></p>
+</div>
+<div class="paragraph">
+<p>I was recently forced to deploy this blog on a new server, and it was pretty terrible. The problem was that I expected myself to remember a process with more than 1 step; history has proven that this expectation is ridiculous. In the months since my last update, I had completely forgotten the steps required to deploy this blog and largely forgotten the specifics of how it is supposed to work.</p>
+</div>
+<div class="paragraph">
+<p>Being forced to relearn an entire application in order to perform routine maintenance served as a painful reminder of why it&#8217;s valuable to spend a little extra time documenting your code. Determined to not make the same mistake twice, I decided to write How It Works post to help my future self. Let&#8217;s get meta!</p>
+</div>
+<div class="sect1">
+<h2 id="_overview">Overview</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>I wanted to keep the design as simple as possible. My initial requirements were:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Allow entries written in Markdown and to be presented as pretty HTML</p>
+</li>
+<li>
+<p>Use <a href="https://angularjs.org/">Angular</a> and <a href="http://gruntjs.com/">Grunt</a> (just because)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>To keep things uncomplicated, I decided the backend would be a static file system. All dynamic behavior would be handled by angular.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_static_backend">Static Backend</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Starting from a post written in Markdown, my first step to publishing is to manually run the document through <a href="https://developer.github.com/v3/markdown/">Github&#8217;s markdown api</a>. The translated HTML file gets pushed to a directory served by the <a href="http://expressjs.com/4x/api.html#app.use">express static middlewear</a>.</p>
+</div>
+<div class="paragraph">
+<p>For example, the content of <a href="http://kalmas.net/blog/scramble-squares" class="bare">http://kalmas.net/blog/scramble-squares</a> can be accessed at <a href="http://kalmas.net/content/blog/scramble-squares.html" class="bare">http://kalmas.net/content/blog/scramble-squares.html</a>. Boom, easy.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_dynamic_frontend">Dynamic Frontend</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Now that content is being served, it is ready to be pulled into a UI by Angular. For a basic example of how everything comes together, let&#8217;s look at the sequence of events that occur when a user lands at <a href="http://kalmas.net/blog/scramble-squares" class="bare">http://kalmas.net/blog/scramble-squares</a>.</p>
+</div>
+<div class="paragraph">
+<p>1: Angular&#8217;s route provider service examines the URL to see if it matches a specified route. It does, and the request is handed to the blog controller (BlogCtrl).</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-js" data-lang="js">// app/scripts/app.js
+$routeProvider
+  .when('/blog/:slug', {
+    templateUrl: 'partials/blog',
+    controller: 'BlogCtrl'
+  })</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>2: The BlogCtrl asks a BlogPosts service for the post linked to the requested slug ("scramble-squares").</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-js" data-lang="js">// app/scripts/controllers/blog.js
+BlogPosts.getPostBySlug(slug)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>3: The BlogPosts service requests a Table of Contents from the server (it&#8217;s at <a href="http://kalmas.net/content/blog/toc.json" class="bare">http://kalmas.net/content/blog/toc.json</a>) and looks to see if there is an item with the requested slug. Assuming there is, we get back a blog post object.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-js" data-lang="js">{
+  slug: "scramble-squares",
+  title: "Hacking Scramble Squares",
+  date: "2014-01-01",
+  desk: "Programming",
+  desc: "For his birthday, my dad received a puzzle from a family friend. The puzzle is called Scramble Squares® and the concept is simple: A player starts out with nine square pieces, each with a different design",
+  content-path: "content/blog/scramble-squares.html"
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>4: The blog post object gives us all the data we need to render the page. The most important bit is the <code>content-path</code>, which holds the path to the blog post&#8217;s html (<a href="http://kalmas.net/content/blog/scramble-squares.html" class="bare">http://kalmas.net/content/blog/scramble-squares.html</a>). Angular makes it easy for us to auto-magically render this content in the browser.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-html" data-lang="html">&lt;div class="content" ng-include="post.contentPath"&gt;&lt;/div&gt;</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_serving_the_robots">Serving The Robots</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Eventually I realized that there was a third, unforeseen requirement forced upon me by the nature of single page web apps and search engine web crawlers.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Serve fully rendered static HTML to robotic visitors (for the SEO)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Search engine web crawlers don&#8217;t run JavaScript, so content that gets injected into the DOM via AJAX does not get indexed. In my case this is basically everything (just reload this page with JS disabled to see) I don&#8217;t have huge expectations for the readership of this blog, but I&#8217;d like to at least hope that it will pop up in a Google search occasionally. And besides, if the robots are reading, at least that&#8217;s someone.</p>
+</div>
+<div class="paragraph">
+<p>There&#8217;s obviously a solution to this indexing problem, but it&#8217;s not trivial. Google and other search engines provide a way to specify a static (i.e. no JS required) version of your pages along side your fancy, unindexable one page app. It works like this: upon encountering a webpage with the meta tag <code>&lt;meta name="fragment" content="!"&gt;</code>, the robots will make a request for the same base url with <code>/?<em>escaped_fragment</em>=</code> appended. The expectation is that the second URL will serve a static HTML version of the original page. As an example, a static version of <a href="http://kalmas.net/blog/scramble-squares" class="bare">http://kalmas.net/blog/scramble-squares</a> is available at <a href="http://kalmas.net/?" class="bare">http://kalmas.net/?</a><em>escaped_fragment</em>=/blog/scramble-squares</p>
+</div>
+<div class="paragraph">
+<p>I generate the rendered HTML files using <a href="http://phantomjs.org/">PhantomJS</a>. A build script runs through the Table of Contents to fetch all the blog post URLs. Each URL is then passed to a PhantomJS script that renders the DOM and then dumps out HTML.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-js" data-lang="js">// scripts/takeSnapshot.phantom.js
+page.open(url, function(success) {
+  setTimeout(function () {
+    var html = page.evaluate(function () {
+      return document.getElementsByTagName('html')[0].outerHTML;
+    });
+
+    // send rendered html to console
+    console.log(stripIt(html));
+    phantom.exit();
+  }, 2000);
+});</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The rendered HTML is saved to a file and served by an express middlewear that responds to requests for <code>?<em>escaped_fragment</em></code>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_build_process">Build Process</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In the process of relearning and redeploying my blog, I spent a lot of time getting familiar with Grunt and streamlining my build process. I had a lot of boilerplate stuff in my Gruntfile from when I first bootstraped the app with <a href="https://github.com/DaftMonk/generator-angular-fullstack" class="bare">https://github.com/DaftMonk/generator-angular-fullstack</a>. Everything worked so well the first time that I never really had to poke the Gruntfile, and as a result had a poor understanding of what exactly was going on.</p>
+</div>
+<div class="paragraph">
+<p>After taking it all apart and putting it back together I reduced my deployment process to a few (relatively) simple steps.</p>
+</div>
+<div class="paragraph">
+<p>1: Get blog content from its Git repository. This is done via the <a href="https://github.com/rubenv/grunt-git">grunt-git plugin</a></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-sh" data-lang="sh">grunt get-blog</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-js" data-lang="js">grunt.registerTask('get-blog', [
+  'gitclone:blog'
+]);
+
+// in grunt.initConfig
+gitclone: {
+  blog: {
+    options: {
+      repository: 'https://kalmas@bitbucket.org/kalmas/blog.git'
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>2: Build. A lot happens here, but most of it is boilerplate. We start by linting our code and running our tests. Next, we delete any previous build artifacts. Finally we install our UI dependencies, minimize everything, and copy our static resources (including blog HTML content) into a public directory.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-sh" data-lang="sh">grunt</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-js" data-lang="js">grunt.registerTask('default', [
+  'newer:jshint',
+  'test',
+  'build'
+]);
+
+grunt.registerTask('build', [
+  'clean:dist',
+  'bower-install',
+  'useminPrepare',
+  'concurrent:dist',
+  'autoprefixer',
+  'concat',
+  'ngmin',
+  'copy:dist',
+  'cdnify',
+  'cssmin',
+  'uglify',
+  'rev',
+  'usemin'
+]);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>3: Serve. This step starts the server. To serve the site in production I simply run <code>node server.js</code>, but while developing grunt provides a dev server that automatically polls for code changes. It&#8217;s super handy.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-sh" data-lang="sh">grunt serve</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-js" data-lang="js">grunt.registerTask('serve', function (target) {
+  grunt.task.run([
+    'clean',
+    'bower-install',
+    'concurrent:server',
+    'autoprefixer',
+    'copy:dev',
+    'express:dev',
+    'open',
+    'watch'
+  ]);
+});</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>4: Finally, once the site is running we can generate static HTML snapshots. This is done using the <a href="https://github.com/Bartvds/grunt-execute">grunt-execute plugin</a> to call the PhantomJS script, which will drop the HTML to the expected location</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-sh" data-lang="sh">grunt snapshot</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-js" data-lang="js">grunt.registerTask('snapshot', function (target) {
+  if (target === 'dist') {
+    return grunt.task.run(['execute:build-snapshot-dist']);
+  }
+
+  grunt.task.run(['execute:build-snapshot-dev']);
+});
+
+// in grunt.initConfig
+execute: {
+  "build-snapshot-dev": {
+    src: ['scripts/buildSnapshots.js'],
+    options: {
+      args: ['../app/content/snapshots', 'localhost:9000']
+    },
+  },
+  "build-snapshot-dist": {
+    src: ['scripts/buildSnapshots.js'],
+    options: {
+      args: ['../public/content/snapshots', 'kalmas.net']
+    },
+  }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+
+    </div>
+  </div>
+</section>
+<section class="section">
+  <div class="container has-text-centered">
+    <p></p>
+  </div>
+</section>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.6.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>

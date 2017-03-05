@@ -1,0 +1,138 @@
++++
+title = "Find and Replace with Mongoose"
+date = "2014-02-23"
++++
+
+I recently discovered a weird gap in the functionality of Mongoose. I've been building a number of simple data caching services using Node, and http://mongoosejs.com/[Mongoose] has been my swiss army knife for all things Mongo related. Schema definition, server connection, collection management, access to native driver; Mongoose makes it simple. All in all, it's a fantastic tool that has drastically reduced my lines of code dedicated db stuff.
+
+The gap that I mentioned has to do with a use case that I would assume is fairly common: I want to insert a document into a collection, replacing the existing version of the document if it exists. For example, I have new document with `_id: 123`. If there is no document with the same `_id` already in the collection, I want to insert the new document. If there is a document with the same `_id`, I want to remove the old one and then insert the new one.
+
+Based on the assumption that you found this page while struggling with the same problem, I'll skip the explination and give you the answer.
+
+[source,js]
+----
+/*
+ * My hacky solution for doing a find and replace with Mongoose
+ *
+ * 1. Validate object
+ * 2. Then strip extra fields
+ * 3. And finally upsert
+ */
+var weirdObject = { aNumericField: 14, weirdUnexpectedField: 'Tom Selleck' };
+var weirdDocument = new CoolDocument(weirdObject);
+weirdDocument.validate(function (err) { // Validate
+	if (err) { throw new Error('Validation failed :('); }
+
+	var cleanObject = weirdDocument.toObject(); // Strip extra fields
+
+	collection.update({ _id: 123 }, // Upsert
+		cleanObject,
+		{ upsert: true },
+		callback);
+});
+
+// Stored in db:
+// { _id: 123, aNumericField: 14 }
+----
+
+Now that that's out of the way, I'll walk you through the process by which I arrived here.
+
+Oh you're still reading, okay... Let's begin with how I could achieve this behavior with https://github.com/mongodb/node-mongodb-native[node-mongodb-native].
+
+[source,javascript]
+----
+collection.update({ _id: 123 },
+	newDocument,
+	{ upsert: true },
+	callback);
+----
+
+But why would I use the native driver when I have a cool utility lib to play with? Surely Mongoose has some sugar I can use.
+
+The standard save in Mongoose looks like this.
+
+[source,javascript]
+----
+var coolObject = { _id: 123, aNumericField: 3 };
+var coolDocument = new CoolDocument(coolObject);
+coolDocument.save();
+----
+
+But that won't work because `save` doesn't have the ability to update an existing document, so I'd need to use some clunky find-and-then-save process. I should be able to do better.
+
+Turns out Mongoose provides a `findOneAndUpdate` method on its model objects. That has a promising name and a signature identical to node-mongodb-native's `collection.update`, but unfortunately it has 2 major flaws. The first is that `findOneAndUpdate` totally bypasses schema validation and any other Mongoose middlewear.
+
+[source,javascript]
+----
+/*
+ * No good: Will upsert without forcing schema validation
+ */
+var invalidObject = { aNumericField: 'what? a string?' };
+model.findOneAndUpdate({ _id: 123 },
+	invalidObject,
+	{ upsert: true },
+	callback);
+
+// Stored in db:
+// { _id: 123, aNumericField: 'what? a string?' }
+----
+
+Well, I'm not using Mongoose to have all of my lovingly crafted schemas ignored, so that's a pain, but there's more. While `findOneAndUpdate` looks and sounds a lot like `collection.update`, it doesn't act like it. Instead of sending `newObject` to the db for upsert like one might expect, it actually sends `{ $set: newObect }`. This means that it won't totally replace any existing document, it will just update any fields attached to `newObject`. So if I mean to delete some fields by not sending them, I won't be successful. Instead I'll end up with a merged offspring of the old and new documents.
+
+[source,javascript]
+----
+/*
+ * No good: Will merge documents instead of replacing
+ */
+var firstVersion = { aNumericField: 14 };
+model.findOneAndUpdate({ _id: 123 },
+	firstVersion,
+	{ upsert: true },
+	callback);
+
+// Stored in db:
+// { _id: 123, aNumericField: 14 }
+
+var secondVersion = { aStringField: 'cool' };
+model.findOneAndUpdate({ _id: 123 },
+	secondVersion,
+	{ upsert: true },
+	callback);
+
+// Stored in db:
+// { _id: 123, aNumericField: 14, aStringField: 'cool' }
+----
+
+The Mongoose documentation justifies this behavior with the argument that it prevents you from accidentally overwriting your documents. But what if I want to on purpose overwrite things? how do I do that?
+
+I knew that I didn't want to use `findOneAndUpdate`, because it works differently-than-guessable (a thing I try to avoid). But maybe I could combine `collection.update` with an explicit call to `document.validate()` to get the validation I wanted and the update behavior I expected.
+
+But alas, this results in a new problem. `document.validate` will check each field defined in my schema, but any extra fields will be ignored by validation. This means that unexpected fields get a free ride into the database.
+
+[source,javascript]
+----
+/*
+ * No good: Will allow extra fields
+ */
+var weirdObject = { aNumericField: 14, weirdUnexpectedField: 'Tom Selleck' };
+var weirdDocument = new CoolDocument(weirdObject);
+weirdDocument.validate(function (err) {
+	if (err) { throw new Error('Validation failed :('); }
+
+	collection.update({ _id: 123 },
+		weirdObject,
+		{ upsert: true },
+		callback);
+});
+
+// Stored in db:
+// { _id: 123, aNumericField: 14, weirdUnexpectedField: 'Tom Selleck' }
+----
+
+Finally, after many hours of head banging, I discovered the the solution was to:
+
+1. Call `document.validate` to apply the schema validation
+2. Call `document.toObject` to strip off any unexpected fields
+3. Upsert the cleaned object with `collection.update`
+
+If somehow you made it to the end of this post without seeing the working solution up top, please scroll up to the first code block now.

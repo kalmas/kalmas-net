@@ -1,0 +1,25 @@
+{{ partial "header" . }}
+</head>
+<body>
+{{ partial "nav" . }}
+<section>
+  <div class="container">
+    {{ range sort .Paginator.Pages }}
+    <article class="margin-bottom-xlg">
+      <h2 class="size-medium grey">{{ .Date.Format "Monday, January 1, 2006" }}</h2>
+      <h1><a class="no-dec black" href="{{ .Permalink }}">{{ .Title }}</a>{{ if .Draft }} ::Draft{{ end }}</h1>
+      <div class="preview">
+        <p>
+          {{ .Summary | plainify | safeHTML }}
+          {{ if .Truncated }}
+          <a href="{{ .Permalink }}" style="height:28px">
+            Read More
+          </a>
+          {{ end }}
+        </p>
+      </div>
+    </article>
+    {{ end }}
+  </div>
+</section>
+{{ partial "footer" . }}
