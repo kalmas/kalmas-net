@@ -1,60 +1,63 @@
 {{ partial "header" . }}
 
-  <link rel="stylesheet" href="{{ .Site.BaseURL }}/css/home.css">
+    <link rel="stylesheet" href="/css/home.css">
 
 </head>
 <body>
 
 <div id="container" class="valign-wrapper">
 <div class="card-panel card valign center layer" id="card" data-depth="0.00">
-	<div class="card-content">
-		<h1>Kyle Almas</h1>
-		<h2>Software Engineer</h2>
-		<h3>Nofolk, VA</h3>
-		<hr class="underline" id="line-left" /><hr class="underline" id="line-right" />
-		<div id="email">kylealmas@gmail.com</div>
-		<ul id="links">
-			<li><a href="/blog/">Blog</a></li>
-			<li><a href="https://github.com/kalmas">GitHub</a></li>
-			<li><a href="/resume/resume.pdf">Resume</a></li>
-		</ul>
-	</div>
+    <div class="card-content">
+        <h1>Kyle Almas</h1>
+        <h2>Software Engineer</h2>
+        <h3>Richmond, VA</h3>
+        <hr class="underline" id="line-left" /><hr class="underline" id="line-right" />
+        <div id="email">
+            <a href="mailto:kylealmas@gmail.com">kylealmas@gmail.com</a>
+        </div>
+        <ul id="links">
+            <li><a href="/blog">Blog</a></li>
+            <li><a href="https://www.linkedin.com/in/kylealmas/">LinkedIn</a></li>
+            <li><a href="/resume/resume.pdf">Resume</a></li>
+        </ul>
+    </div>
 </div>
 <div id="background" class="flow-text layer" data-depth="0.50">
-	<ul id="skills">
-		<li>AngularJS</li>
-		<li>Bash</li>
-		<li>Coffee</li>
-		<li>Comic Books</li>
-		<li>CSS</li>
-		<li>ElasticSearch</li>
-		<li>Docker</li>
-		<li>Documentation</li>
-		<li>Geospatial Search</li>
-		<li>Git</li>
-		<li>Gradle</li>
-		<li>Heroku</li>
-		<li>Java</li>
-		<li>JavaScript</li>
-		<li>Logstash</li>
-		<li>PHP</li>
-		<li>Reactive Programming</li>
-		<li>REST</li>
-		<li>RxJs</li>
-		<li>Microservices</li>
-		<li>MongoDB</li>
-		<li>Node.js</li>
-		<li>Norfolk</li>
-		<li>Pop Music</li>
-		<li>Redis</li>
-		<li>Running</li>
-		<li>Spring Data</li>
-		<li>Spring Web MVC</li>
-		<li>SQL Server</li>
-		<li>TypeScript</li>
-		<li>Unit Testing</li>
-		<li>Vegan Food</li>
-	</ul>
+    <ul id="skills">
+        <li>AWS</li>
+        <li>Architecture</li>
+        <li>Coffee</li>
+        <li>Comic Books</li>
+        <li>ElasticSearch</li>
+        <li>Documentation</li>
+        <li>Diagrams</li>
+        <li>Geospatial Search</li>
+        <li>Git</li>
+        <li>Gradle</li>
+        <li>JPA</li>
+        <li>Java</li>
+        <li>JavaScript</li>
+        <li>Kafka</li>
+        <li>Information Theory</li>
+        <li>Logstash</li>
+        <li>PHP</li>
+        <li>Richmond, VA</li>
+        <li>REST</li>
+        <li>Microservices</li>
+        <li>MongoDB</li>
+        <li>Node.js</li>
+        <li>Norfolk, VA</li>
+        <li>Pop Music</li>
+        <li>Redis</li>
+        <li>Ramen</li>
+        <li>Running</li>
+        <li>Spring Boot</li>
+        <li>Stream Processing</li>
+        <li>SQL</li>
+        <li>Twilio</li>
+        <li>Unit Testing</li>
+        <li>Vegan Food</li>
+    </ul>
 </div>
 
 </div>
@@ -65,41 +68,41 @@
 
 <script>
 function isBackgroundFilled() {
-	if ($('#skills').height() > ($(window).height()) * 2) {
-		return true;
-	}
+    if ($('#skills').height() > ($(window).height()) * 2) {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
 function shuffle(array) {
-	var length = array.length;
-	var currentIndex = length;
-	var randomIndex;
-	var temp;
+    var length = array.length;
+    var currentIndex = length;
+    var randomIndex;
+    var temp;
 
-	while (currentIndex > 1) {
-		randomIndex = Math.floor(Math.random() * currentIndex);
-		currentIndex = currentIndex - 1;
+    while (currentIndex > 1) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex = currentIndex - 1;
 
-		temp = array[currentIndex];
-		array[currentIndex] = array[randomIndex];
-		array[randomIndex] = temp;
-	}
+        temp = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temp;
+    }
 
-	return array;
+    return array;
 }
 
 $(document).ready(function() {
-	var interests = $('#skills');
-	var interestsItems = interests.children('li');
-	interests.empty();
+    var interests = $('#skills');
+    var interestsItems = interests.children('li');
+    interests.empty();
 
-	$('#container').parallax();
+    $('#container').parallax();
 
-	while(!isBackgroundFilled()) {
-		interests.append(shuffle(interestsItems.clone()));
-	}
+    while(!isBackgroundFilled()) {
+        interests.append(shuffle(interestsItems.clone()));
+    }
 });
 </script>
 </body>

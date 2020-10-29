@@ -48,7 +48,7 @@ display:inline;
 list-style-type:none;
 }
 
-#links li a {
+a {
 text-decoration:none;
 }
 
