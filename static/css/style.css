@@ -12,6 +12,8 @@ font-weight:bold;
 
 p {
 font-family:Lora, serif;
+line-height: 1.25em;
+margin: 1.5em 0;
 }
 
 .content code {

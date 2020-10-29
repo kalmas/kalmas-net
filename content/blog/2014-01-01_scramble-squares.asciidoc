@@ -7,7 +7,7 @@ For his birthday, my dad received a puzzle from a family friend. The puzzle is c
 
 Anyway, here's a picture of the unsolved puzzle, you'll get the idea.
 
-image:/img/scramble-squares_unsolved.jpg[Unsolved Puzzle]
+![Unsolved Puzzle](/img/scramble-squares_unsolved.jpg)
 
 The family friend got this for my dad because she knew that he would be frustrated by a puzzle, especially a seemingly simple one. I was similarly ensnared; with only nine pieces and eight different sides, how hard could it be to solve? Turns out, totally hard. After fumbling through some bad approaches on Christmas morning I realized that I wasn't going to get to the solution by accident. I would need a better strategy.
 
@@ -15,9 +15,9 @@ As with most things, my strategy would be to cheat using a computer.
 
 The obvious approach is to use brute force: attempt each possible combination until I get to one that works. I did some napkin math to try to get a handle on how many possible combinations of pieces exist, and thus how many configurations I might need to try. Each of the nine pieces can be rotated to four different orientations.
 
-image:/img/scramble-squares_rotation.jpg[Rotation Example]
+![Rotation Example](/img/scramble-squares_rotation.jpg)
 
-This gives us thirty-six playable "pieces." So if the puzzle was to put a piece down on a table, there would be thirty-six different ways we could play it. If we needed to put down 2 pieces we have the original thirty-six options for the first piece, but only thirty-two (eight remaining pieces, each with four possible orientations) options for the second. This makes for 36 * 32 = 1,152 possible combinations that can be made with two pieces. It follows that if we need to play 9 pieces we have 36 * 32 * 28 * 24 * 20 * 16 * 12 * 8 * 4 = 95,126,814,720. We'll call it 100 billion.
+This gives us thirty-six playable "pieces." So if the puzzle was to put a piece down on a table, there would be thirty-six different ways we could play it. If we needed to put down 2 pieces we have the original thirty-six options for the first piece, but only thirty-two (eight remaining pieces, each with four possible orientations) options for the second. This makes for `36 * 32 = 1,152` possible combinations that can be made with two pieces. It follows that if we need to play 9 pieces we have `36 * 32 * 28 * 24 * 20 * 16 * 12 * 8 * 4 = 95,126,814,720`. We'll call it 100 billion.
 
 100 billion is a lot of combinations. For a sense of magnitude, let's assume that we can attempt 10,000 combinations per second: it will take us 115 days to try every combination.
 
@@ -27,122 +27,117 @@ I decided it was reasonable that a brute force approach might possibly work. Onl
 
 My first step was to model the pieces, which I thought of as a collection of 4 designs, one facing each direction. A piece also has an "origin," an identifier to link it to a physical piece (remember each physical piece can have four rotated representations), as well as a "rotation." Inputing the data of my physical pieces ended up looking like the following.
 
-[source,java]
-----
+```java
 List<Piece> pieces = new ArrayList<Piece>();
 pieces.add(new Piece("A", 0, new Golden(Design.REAR),
-	new Black(Design.REAR),
-	new Yellow(Design.REAR),
-	new Chocolate(Design.REAR)));
+    new Black(Design.REAR),
+    new Yellow(Design.REAR),
+    new Chocolate(Design.REAR)));
 pieces.add(new Piece("B", 0, new Golden(Design.FRONT),
-	new Black(Design.FRONT),
-	new Yellow(Design.FRONT),
-	new Chocolate(Design.REAR)));
+    new Black(Design.FRONT),
+    new Yellow(Design.FRONT),
+    new Chocolate(Design.REAR)));
 pieces.add(new Piece("C", 0, new Chocolate(Design.FRONT),
-	new Golden(Design.FRONT),
-	new Yellow(Design.FRONT),
-	new Black(Design.REAR)));
+    new Golden(Design.FRONT),
+    new Yellow(Design.FRONT),
+    new Black(Design.REAR)));
 pieces.add(new Piece("D", 0, new Chocolate(Design.FRONT),
-	new Yellow(Design.REAR),
-	new Black(Design.FRONT),
-	new Golden(Design.FRONT)));
+    new Yellow(Design.REAR),
+    new Black(Design.FRONT),
+    new Golden(Design.FRONT)));
 pieces.add(new Piece("E", 0, new Golden(Design.REAR),
-	new Black(Design.FRONT),
-	new Yellow(Design.FRONT),
-	new Chocolate(Design.REAR)));
+    new Black(Design.FRONT),
+    new Yellow(Design.FRONT),
+    new Chocolate(Design.REAR)));
 pieces.add(new Piece("F", 0, new Golden(Design.FRONT),
-	new Black(Design.REAR),
-	new Yellow(Design.REAR),
-	new Chocolate(Design.FRONT)));
+    new Black(Design.REAR),
+    new Yellow(Design.REAR),
+    new Chocolate(Design.FRONT)));
 pieces.add(new Piece("G", 0, new Yellow(Design.FRONT),
-	new Golden(Design.FRONT),
-	new Chocolate(Design.FRONT),
-	new Black(Design.FRONT)));
+    new Golden(Design.FRONT),
+    new Chocolate(Design.FRONT),
+    new Black(Design.FRONT)));
 pieces.add(new Piece("H", 0, new Golden(Design.FRONT),
-	new Black(Design.FRONT),
-	new Yellow(Design.REAR),
-	new Chocolate(Design.FRONT)));
+    new Black(Design.FRONT),
+    new Yellow(Design.REAR),
+    new Chocolate(Design.FRONT)));
 pieces.add(new Piece("I", 0, new Yellow(Design.FRONT),
-	new Black(Design.FRONT),
-	new Chocolate(Design.FRONT),
-	new Golden(Design.REAR)));
-----
+    new Black(Design.FRONT),
+    new Chocolate(Design.FRONT),
+    new Golden(Design.REAR)));
+```
 
 This gave me a collection of nine pieces, each of which I passed through a "Rotator" to generate the thirty-six potential pieces.
 
 Next, I created a special collection called a PieceSequence to represent a group of pieces in play. Based on the pieces already inserted it could decide whether a given piece represented a feasible play for the next available position.
 
-[source,java]
-----
+```java
 public boolean pieceIsPlayable(Piece piece){
-	int count = pieces.size();
-	switch(count){
-		case 0:
-			// Anything can be played in the first position
-			return true;
-		case 1:
-		case 2:
-			// Second two positions must match piece to the left
-			return pieces.get(count - 1).canBeToTheWestOf(piece);
-		case 3:
-		case 6:
-			// Third and sixth positions must match piece above
-			return pieces.get(count - 3).canBeToTheNorthOf(piece);
-		default:
-			// Other positions must match the piece to the left and the piece above
-			return (pieces.get(count - 1).canBeToTheWestOf(piece)
-					&& pieces.get(count - 3).canBeToTheNorthOf(piece));
-	}
+    int count = pieces.size();
+    switch(count){
+        case 0:
+            // Anything can be played in the first position
+            return true;
+        case 1:
+        case 2:
+            // Second two positions must match piece to the left
+            return pieces.get(count - 1).canBeToTheWestOf(piece);
+        case 3:
+        case 6:
+            // Third and sixth positions must match piece above
+            return pieces.get(count - 3).canBeToTheNorthOf(piece);
+        default:
+            // Other positions must match the piece to the left and the piece above
+            return (pieces.get(count - 1).canBeToTheWestOf(piece)
+                    && pieces.get(count - 3).canBeToTheNorthOf(piece));
+    }
 }
-----
+```
 
 Finally I wrote a play method to spin through all the possible combinations. Its logic is simple; identical to the work flow a very diligent monkey might apply to the same task.
 
-[source,java]
-----
+```java
 function play(playedSequence, playablePieces) {
-	foreach(playablePieces as piece) {
-		if(Piece Can Be Added To playedSequence) {
-			playedSequence.add(piece)
-			filteredPieces = Remove Pieces With Same Origin As piece From playablePieces
-			play(playedSequence, playablePieces)
-		}
-	}
+    foreach(playablePieces as piece) {
+        if(Piece Can Be Added To playedSequence) {
+            playedSequence.add(piece)
+            filteredPieces = Remove Pieces With Same Origin As piece From playablePieces
+            play(playedSequence, playablePieces)
+        }
+    }
 }
-----
+```
 
 My actual code ended up looking like the following.
 
-[source,java]
-----
+```java
 public PieceSequence play(PieceSequence currentSeq, List<Piece> playablePieces) {
-	for(int i = 0; i < playablePieces.size(); i++){
-		tries++;
-		Piece pieceToPlay = playablePieces.get(i);
-		if(currentSeq.pieceIsPlayable(pieceToPlay)){
-			List<Piece> filteredList = removePiecesWithSameOrigin(playablePieces, pieceToPlay.getOrigin());
-			PieceSequence newSeq = new PieceSequence(currentSeq);
-			newSeq.add(pieceToPlay);
-			if(newSeq.size() == 9){
-				return newSeq;
-			} else {
-				PieceSequence result = play(newSeq, filteredList);
-				if(result != null){
-					return result;
-				}
-			}
-		}
-	}
+    for(int i = 0; i < playablePieces.size(); i++){
+        tries++;
+        Piece pieceToPlay = playablePieces.get(i);
+        if(currentSeq.pieceIsPlayable(pieceToPlay)){
+            List<Piece> filteredList = removePiecesWithSameOrigin(playablePieces, pieceToPlay.getOrigin());
+            PieceSequence newSeq = new PieceSequence(currentSeq);
+            newSeq.add(pieceToPlay);
+            if(newSeq.size() == 9){
+                return newSeq;
+            } else {
+                PieceSequence result = play(newSeq, filteredList);
+                if(result != null){
+                    return result;
+                }
+            }
+        }
+    }
 
-	// Whelp, this was a dead end
-	return null;
+    // Whelp, this was a dead end
+    return null;
 }
-----
+```
 
 Uh, that's pretty much it. Once I managed to get my code to compile, out came an answer. Much faster than I expected it would.
 
-[source,txt]
-----
+```
 Solved it in 14411 tries:
    Y1
     _
@@ -197,13 +192,12 @@ Y1 | | G2    E1
 G1 | | B1    G2
     -
    Y1
+```
 
-----
-
-14,411 tries is quite a bit smaller than the 100 billion possible combinations. It's more than I would try on a table, but not enough to take my computer more than a second. The relatively low number surprised me, and makes suspect that there is more than one winning combinations (contrary to the packagings description). I'd like to test this, but maybe in another post.
+14,411 tries is quite a bit smaller than the 100 billion possible combinations. It's more than I would try on a table, but not enough to take my computer more than a second. The relatively low number surprised me, and makes suspect that there is more than one winning combinations (contrary to the package description). I'd like to test this, but maybe in another post.
 
 The code I wrote for this is on github https://github.com/kalmas/squares-hack[https://github.com/kalmas/squares-hack].
 
 Finally, here's the solved puzzle. Spoiler alert...
 
-image:/img/scramble-squares_solved.jpg[Solved]
+![Solved](/img/scramble-squares_solved.jpg)

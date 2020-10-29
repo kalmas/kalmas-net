@@ -1,0 +1,10 @@
+baseurl: https://kalmas.net
+languageCode: en-US
+title: Kyle Almas
+dateFormat: 2015-01-01
+
+pluralizeListTitles: false
+
+markup:
+    highlight:
+        style: monokailight
