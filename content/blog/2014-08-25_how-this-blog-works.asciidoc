@@ -9,7 +9,7 @@ I was recently forced to deploy this blog on a new server, and it was pretty ter
 
 Being forced to relearn an entire application in order to perform routine maintenance served as a painful reminder of why it's valuable to spend a little extra time documenting your code. Determined to not make the same mistake twice, I decided to write How It Works post to help my future self. Let's get meta!
 
-== Overview ==
+## Overview
 
 I wanted to keep the design as simple as possible. My initial requirements were:
 
@@ -18,40 +18,37 @@ I wanted to keep the design as simple as possible. My initial requirements were:
 
 To keep things uncomplicated, I decided the backend would be a static file system. All dynamic behavior would be handled by angular.
 
-== Static Backend ==
+## Static Backend
 
 Starting from a post written in Markdown, my first step to publishing is to manually run the document through https://developer.github.com/v3/markdown/[Github's markdown api]. The translated HTML file gets pushed to a directory served by the http://expressjs.com/4x/api.html#app.use[express static middlewear].
 
 For example, the content of http://kalmas.net/blog/scramble-squares can be accessed at http://kalmas.net/content/blog/scramble-squares.html. Boom, easy.
 
-== Dynamic Frontend ==
+## Dynamic Frontend
 
 Now that content is being served, it is ready to be pulled into a UI by Angular. For a basic example of how everything comes together, let's look at the sequence of events that occur when a user lands at http://kalmas.net/blog/scramble-squares.
 
 1: Angular's route provider service examines the URL to see if it matches a specified route. It does, and the request is handed to the blog controller (BlogCtrl).
 
-[source,js]
-----
+```js
 // app/scripts/app.js
 $routeProvider
   .when('/blog/:slug', {
     templateUrl: 'partials/blog',
     controller: 'BlogCtrl'
   })
-----
+```
 
 2: The BlogCtrl asks a BlogPosts service for the post linked to the requested slug ("scramble-squares").
 
-[source,js]
-----
+```js
 // app/scripts/controllers/blog.js
 BlogPosts.getPostBySlug(slug)
-----
+```
 
 3: The BlogPosts service requests a Table of Contents from the server (it's at http://kalmas.net/content/blog/toc.json) and looks to see if there is an item with the requested slug. Assuming there is, we get back a blog post object.
 
-[source,js]
-----
+```js
 {
   slug: "scramble-squares",
   title: "Hacking Scramble Squares",
@@ -60,16 +57,15 @@ BlogPosts.getPostBySlug(slug)
   desc: "For his birthday, my dad received a puzzle from a family friend. The puzzle is called Scramble Squares® and the concept is simple: A player starts out with nine square pieces, each with a different design",
   content-path: "content/blog/scramble-squares.html"
 }
-----
+```
 
 4: The blog post object gives us all the data we need to render the page. The most important bit is the `content-path`, which holds the path to the blog post's html (http://kalmas.net/content/blog/scramble-squares.html). Angular makes it easy for us to auto-magically render this content in the browser.
 
-[source,html]
-----
+```js
 <div class="content" ng-include="post.contentPath"></div>
-----
+```
 
-== Serving The Robots ==
+## Serving The Robots
 
 Eventually I realized that there was a third, unforeseen requirement forced upon me by the nature of single page web apps and search engine web crawlers.
 
@@ -81,8 +77,7 @@ There's obviously a solution to this indexing problem, but it's not trivial. Goo
 
 I generate the rendered HTML files using http://phantomjs.org/[PhantomJS]. A build script runs through the Table of Contents to fetch all the blog post URLs. Each URL is then passed to a PhantomJS script that renders the DOM and then dumps out HTML.
 
-[source,js]
-----
+```js
 // scripts/takeSnapshot.phantom.js
 page.open(url, function(success) {
   setTimeout(function () {
@@ -95,11 +90,11 @@ page.open(url, function(success) {
     phantom.exit();
   }, 2000);
 });
-----
+```
 
 The rendered HTML is saved to a file and served by an express middlewear that responds to requests for `?_escaped_fragment_`.
 
-== Build Process ==
+## Build Process
 
 In the process of relearning and redeploying my blog, I spent a lot of time getting familiar with Grunt and streamlining my build process. I had a lot of boilerplate stuff in my Gruntfile from when I first bootstraped the app with https://github.com/DaftMonk/generator-angular-fullstack. Everything worked so well the first time that I never really had to poke the Gruntfile, and as a result had a poor understanding of what exactly was going on.
 
@@ -107,13 +102,11 @@ After taking it all apart and putting it back together I reduced my deployment p
 
 1: Get blog content from its Git repository. This is done via the https://github.com/rubenv/grunt-git[grunt-git plugin]
 
-[source,sh]
-----
+```
 grunt get-blog
-----
+```
 
-[source,js]
-----
+```js
 grunt.registerTask('get-blog', [
   'gitclone:blog'
 ]);
@@ -126,17 +119,15 @@ gitclone: {
     }
   }
 }
-----
+```
 
 2: Build. A lot happens here, but most of it is boilerplate. We start by linting our code and running our tests. Next, we delete any previous build artifacts. Finally we install our UI dependencies, minimize everything, and copy our static resources (including blog HTML content) into a public directory.
 
-[source,sh]
-----
+```sh
 grunt
-----
+```
 
-[source,js]
-----
+```js
 grunt.registerTask('default', [
   'newer:jshint',
   'test',
@@ -158,17 +149,15 @@ grunt.registerTask('build', [
   'rev',
   'usemin'
 ]);
-----
+```
 
 3: Serve. This step starts the server. To serve the site in production I simply run `node server.js`, but while developing grunt provides a dev server that automatically polls for code changes. It's super handy.
 
-[source,sh]
-----
+```sh
 grunt serve
-----
+```
 
-[source,js]
-----
+```js
 grunt.registerTask('serve', function (target) {
   grunt.task.run([
     'clean',
@@ -181,17 +170,15 @@ grunt.registerTask('serve', function (target) {
     'watch'
   ]);
 });
-----
+```
 
 4: Finally, once the site is running we can generate static HTML snapshots. This is done using the https://github.com/Bartvds/grunt-execute[grunt-execute plugin] to call the PhantomJS script, which will drop the HTML to the expected location
 
-[source,sh]
-----
+```sh
 grunt snapshot
-----
+```
 
-[source,js]
-----
+```js
 grunt.registerTask('snapshot', function (target) {
   if (target === 'dist') {
     return grunt.task.run(['execute:build-snapshot-dist']);
@@ -215,4 +202,4 @@ execute: {
     },
   }
 }
-----
+```
