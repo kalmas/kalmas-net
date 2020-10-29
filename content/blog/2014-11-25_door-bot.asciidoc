@@ -5,11 +5,11 @@ date = "2014-11-25"
 
 For a good long while (2 whole years according to Github commits 😩), my buddy Cody and I have been hacking on an automatic door lock for the front door of his house. We've gone through a handful of iterations and dead-ends (the most painful of which involved attempting to write a REST webservice for the Arduino Ethernet Shield), but a few days ago we finally finished. I'm ready to put this project to bed and move on to building *real* robots (the walking, talking, terminating kind). So to wrap things up, here's a blog post...
 
-https://www.instagram.com/p/vcaZWJMZc4/[But first an adorable video!]
+[But first an adorable video!](https://www.instagram.com/p/vcaZWJMZc4/)
 
 ## Version 0
 
-To explain our project, I'll begin with the first iteration of what I will refer to, lovingly, as DoorBot (™ pending). The first DoorBot was something Cody hacked together over a few days: an http://arduino.cc/en/Main/arduinoBoardUno[Arduino Uno] connected to a http://www.amazon.com/Black-Plastic-Weigand-Proximity-Reader/dp/B00AUB2RQ4/ref=sr_1_3?ie=UTF8&qid=1416784413[Arduino Uno] and a http://www.amazon.com/Generic-Secure-Electric-Strike-Control/dp/B00JWDE98K/ref=sr_1_4?s=electronics&ie=UTF8&qid=1416784606[resting closed electric door lock].
+To explain our project, I'll begin with the first iteration of what I will refer to, lovingly, as DoorBot (™ pending). The first DoorBot was something Cody hacked together over a few days: an [Arduino Uno](http://arduino.cc/en/Main/arduinoBoardUno) connected to a [RFID Reader](http://www.amazon.com/Black-Plastic-Weigand-Proximity-Reader/dp/B00AUB2RQ4/ref=sr_1_3?ie=UTF8&qid=1416784413) and a [resting closed electric door lock](http://www.amazon.com/Generic-Secure-Electric-Strike-Control/dp/B00JWDE98K/ref=sr_1_4?s=electronics&ie=UTF8&qid=1416784606).
 
 It worked like this:
 
@@ -21,7 +21,7 @@ The code wasn't pretty and the wiring was slapdash (Cody pointed out that the 2 
 
 ## If It Ain't Broke, Fix It
 
-I decided a necessary enhancement was connecting DoorBot to the Internet. Half of my motivation was to use the project as a learning exercise to better understand the path from solenoid to HTTP. The other half was a desire to bring the logic up to a level where I could use my skill set; several days of compiling http://arduino.cc/en/Reference/HomePage[weird code] to run inside a http://stackoverflow.com/questions/7225693/how-do-you-debug-arduino-code-running-on-arduino-hardware[black box of un-debuggable-ness] had me feeling pretty unproductive.
+I decided a necessary enhancement was connecting DoorBot to the Internet. Half of my motivation was to use the project as a learning exercise to better understand the path from solenoid to HTTP. The other half was a desire to bring the logic up to a level where I could use my skill set; several days of compiling [weird code](http://arduino.cc/en/Reference/HomePage) to run inside a [black box of un-debuggable-ness](http://stackoverflow.com/questions/7225693/how-do-you-debug-arduino-code-running-on-arduino-hardware) had me feeling pretty unproductive.
 
 Cody and I planned to build a simple website that could be used to remotely open the lock. This would be a good learning experience for both of us, and would satisfy the real world use cases of:
 
@@ -32,7 +32,7 @@ Should be pretty simple I thought. We would be done in a week.
 
 ## Version 1 (2 Years Later)
 
-Our latest, working, iteration was completed on November 6th (I almost finished this blog post the same week... alas). It provides the same RFID card reading functionality as Version 0, and adds a one button website to open the door. To accomplish this we ended up adding a http://www.amazon.com/Raspberry-Pi-Model-512MB-Computer/dp/B00LPESRUK[Raspberry Pi] to the DoorBot. Leaving us with an *only slightly* overkill design.
+Our latest, working, iteration was completed on November 6th (I almost finished this blog post the same week... alas). It provides the same RFID card reading functionality as Version 0, and adds a one button website to open the door. To accomplish this we ended up adding a [Raspberry Pi](http://www.amazon.com/Raspberry-Pi-Model-512MB-Computer/dp/B00LPESRUK) to the DoorBot. Leaving us with an *only slightly* overkill design.
 
 ![Door Bot Diagram](/img/door-bot.png)
 
@@ -99,7 +99,7 @@ if (Serial.available()) {
 }
 ```
 
-One complication that we ran into was this: by default the Arduino uses the a specific pin (pin 1, I think?) to read serial input using its built in http://arduino.cc/en/reference/serial[Serial] library, but Serial is also listening to the USB port for input. This means that if you want communication over USB, you can't use Serial to read from the default serial pin at the same time; the streams cross and nothing works. The workaround comes in the form of the http://arduino.cc/en/Reference/softwareSerial[SoftwareSerial] library which allows you to reproduce the functionality of Serial using an arbitrary input and output pin. This is why in the code above there are references to both mySerial (connected to the RFID reader) and Serial (connected to the Pi). You can see how these two references are initialized along with the rest of the script here: https://github.com/kalmas/web-door/blob/master/micro_door/micro_door.ino
+One complication that we ran into was this: by default the Arduino uses the a specific pin (pin 1, I think?) to read serial input using its built in [Serial](http://arduino.cc/en/reference/serial) library, but Serial is also listening to the USB port for input. This means that if you want communication over USB, you can't use Serial to read from the default serial pin at the same time; the streams cross and nothing works. The workaround comes in the form of the [SoftwareSerial](http://arduino.cc/en/Reference/softwareSerial) library which allows you to reproduce the functionality of Serial using an arbitrary input and output pin. This is why in the code above there are references to both mySerial (connected to the RFID reader) and Serial (connected to the Pi). You can see how these two references are initialized along with the rest of the script here: https://github.com/kalmas/web-door/blob/master/micro_door/micro_door.ino
 
 ## On The Pi
 
@@ -141,9 +141,9 @@ router.post('/open', function(req, res) {
 module.exports = router;
 ```
 
-The heavy lifting here is done by https://github.com/strongloop/expressjs.com[express] and https://github.com/voodootikigod/node-serialport[node-serialport]. node-serialport is pretty slick and I can't wait to use it for future robotics projects. Just provide it a USB port address and a baud rate and you're ready to talk to any piece of hardware.
+The heavy lifting here is done by [express](https://github.com/strongloop/expressjs.com) and [node-serialport](https://github.com/voodootikigod/node-serialport). `node-serialport` is pretty slick and I can't wait to use it for future robotics projects. Just provide it a USB port address and a baud rate and you're ready to talk to any piece of hardware.
 
-To get the Pi connected to the network we installed an http://www.amazon.com/Edimax-EW-7811Un-150Mbps-Raspberry-Supports/dp/B003MTTJOY/ref=pd_bxgy_pc_img_y[outrageously cheap USB Wi-Fi dongle] using these easy setup instructions http://kerneldriver.wordpress.com/2012/10/21/configuring-wpa2-using-wpa_supplicant-on-the-raspberry-pi/.
+To get the Pi connected to the network we installed an [outrageously cheap USB Wi-Fi dongle](http://www.amazon.com/Edimax-EW-7811Un-150Mbps-Raspberry-Supports/dp/B003MTTJOY/ref=pd_bxgy_pc_img_y) using these easy setup instructions http://kerneldriver.wordpress.com/2012/10/21/configuring-wpa2-using-wpa_supplicant-on-the-raspberry-pi/.
 
 To make the server run as a service on boot, we added to the `/etc/rc.local.sh`
 
@@ -163,4 +163,4 @@ And made a `start.sh` to start the node server.
 
 The final product works remarkably well. Connecting to the network and pulling up the website is easily done on the way up the driveway. I've encounted a few unexplained server outages, but in these cases I can just fall back to using my RFID card (which always works like a champ). This is my first experience writing code that makes stuff physically move, and it really makes me feel like a magician.
 
-See the full code https://github.com/kalmas/web-door[here]. See the door itself on the front of Cody's house.
+See the full code at https://github.com/kalmas/web-door. See the door itself on the front of Cody's house.
