@@ -7,8 +7,7 @@ I've been working with node a lot recently, and as a result I've been reading a 
 
 We'll start by looking at a simple piece of asynchronous code.
 
-[source,js]
-----
+```js
 var asyncGetMessage = function (callback) {
     var message = 'an asynchronous "hello!"',
         err = null;
@@ -26,16 +25,15 @@ asyncGetMessage(function (err, message) {
 });
 
 console.log('a synchronous "hi"');
-----
+```
 
-http://jsfiddle.net/kalmas/x2Q4y/11/[See the jsFiddle.]
+[See the jsFiddle.](http://jsfiddle.net/kalmas/x2Q4y/11/)
 
 The example is obviously contrived (the `asyncGetMessage` function is only asynchronous because `setTimeout` is used to explicitly delay the response), but it illustrates a pattern thats common in javascript: a function that will return a result eventually is given a callback function containing code to be run once the result is available. In this example, the callback takes a message parameter and prints it out with `console.log`. Because the callback isn't invoked until after 1000 milliseconds have passed, we see the second call to `console.log` (`console.log('a synchronous "hi"');`) execute first, followed by the call in the callback function shortly after.
 
 Ok, so there's no problem with the code above. It's readable and concise, and I'd probably argue that refactoring to use promises would be overkill. But let's take our example one step further.
 
-[source,js]
-----
+```js
 var asyncGetMessage = function (callback) {
     var message = 'an asynchronous "hello!"',
         err = null;
@@ -81,9 +79,9 @@ asyncGetMessage(function (err, message) {
 });
 
 console.log('a synchronous "hi"');
-----
+```
 
-http://jsfiddle.net/kalmas/vpVgX/1/[See the jsFiddle.]
+[See the jsFiddle.](http://jsfiddle.net/kalmas/vpVgX/1/)
 
 The above is a logical progression of our example (or as logical as we can be about useless code). Now when we get the result back from `asyncGetMessage` we pass the result to another asynchronous function, `asyncCaptialize`, which in turn sends its result to `asyncPrint`, finally we notify the console that everything is done.
 
@@ -93,8 +91,7 @@ A promise flips the idea of a callback upside down: instead of sending a piece o
 
 Let's look at our first piece of code rewritten to use promises.
 
-[source,js]
-----
+```js
 var Q = require('q');
 
 var consoleLine = "<p class=\"console-line\"></p>";
@@ -127,14 +124,13 @@ promiseToGetMessage.then(function (message) {
 });
 
 console.log('a synchronous "hi"');
-----
+```
 
-http://jsfiddle.net/a5TdL/2/[See the jsFiddle.]
+[See the jsFiddle.](http://jsfiddle.net/a5TdL/2/)
 
 Now `asyncGetMessage` returns a promise, care of https://github.com/kriskowal/q[the super-fantastic Q library]. The promise provides a `then` method which accepts 2 handler functions. The first gets called with the message on success, the second with an error on failure. This looks a bit cleaner than our first example (to me anyway), but when callbacks start to stack up, promises really shine.
 
-[source,javascript]
-----
+```js
 var Q = require('q');
 
 var asyncGetMessage = function () {
@@ -196,7 +192,7 @@ promiseToGetMessage.then(function (message) {
 });
 
 console.log('a synchronous "hi"');
-----
+```
 
 http://jsfiddle.net/2E8Ts/3/[See the jsFiddle.]
 
@@ -204,14 +200,13 @@ Check it out, our code now only goes one indentation deep (down from six). Withi
 
 When I first encountered promises, I conceptualized the idea like this.
 
-image:/img/explaining-promises-comic.jpg[Promises Comic]
+![Promises Comic](/img/explaining-promises-comic.jpg)
 
-== Promising Asynchronicity ==
+## Promising Asynchronicity
 
 I think that the readability gain alone makes a strong case for using promises, but there is another important feature promises provide that can improve our code. Promises guarantee that the resolution of a function will be asynchronous. Consider the following code.
 
-[source,javascript]
-----
+```js
 var toPrint,
 sometimesAsync = function (shouldIBeAsync, callback) {
     var message = 'an asynchronous "hello!"',
@@ -234,16 +229,15 @@ sometimesAsync(true, function (err, message) {
 });
 
 toPrint = 'a synchronous "hi"';
-----
+```
 
-http://jsfiddle.net/6L9DQ/6/[See the jsFiddle.]
+[See the jsFiddle.](http://jsfiddle.net/6L9DQ/6/)
 
 Try running the example with `shouldIBeAsync` set to `false`, you will see that the output changes. The reason is that `sometimesAsync` may invoke its callback either immediately or asynchronously. The result is that when `shouldIBeAsync` is `true`, `toPrint` is first set to `'a synchronous "hi"'` and then changed to `'an asynchronous "hello!"'` a second later. When `shouldIBeAsync` is `false`, `toPrint` is first set to 'an asynchronous "hello!"' (when `sometimesAsync` is invoked) and then changed to `'a synchronous "hi"'`. As you might imagine, this can cause problems. In fact this behavior is so troublesome it has been termed (hilariously) as http://blog.izs.me/post/59142742143/designing-apis-for-asynchrony[“releasing Zalgo”].
 
 Let's look at the same code using promises.
 
-[source,javascript]
-----
+```
 var toPrint,
 sometimesAsync = function (shouldIBeAsync) {
     var deferred = Q.defer(),
@@ -269,9 +263,9 @@ sometimesAsync(true).then(function (message) {
 });
 
 toPrint = 'a synchronous "hi"';
-----
+```
 
-http://jsfiddle.net/LK6Gv/1/[See the jsFiddle.]
+[See the jsFiddle.](http://jsfiddle.net/LK6Gv/1/)
 
 Now the output will always be the same, whether the function resolves synchronously or asynchronously. Thus promises give us a simple way to ensure that a sometimes asynchronous function is always asynchronous, and that Zalgo stays contained.
 

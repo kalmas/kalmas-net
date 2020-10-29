@@ -9,8 +9,7 @@ The gap that I mentioned has to do with a use case that I would assume is fairly
 
 Based on the assumption that you found this page while struggling with the same problem, I'll skip the explination and give you the answer.
 
-[source,js]
-----
+```js
 /*
  * My hacky solution for doing a find and replace with Mongoose
  *
@@ -33,37 +32,34 @@ weirdDocument.validate(function (err) { // Validate
 
 // Stored in db:
 // { _id: 123, aNumericField: 14 }
-----
+```
 
 Now that that's out of the way, I'll walk you through the process by which I arrived here.
 
-Oh you're still reading, okay... Let's begin with how I could achieve this behavior with https://github.com/mongodb/node-mongodb-native[node-mongodb-native].
+Oh you're still reading, okay... Let's begin with how I could achieve this behavior with https://github.com/mongodb/node-mongodb-native.
 
-[source,javascript]
-----
+```js
 collection.update({ _id: 123 },
 	newDocument,
 	{ upsert: true },
 	callback);
-----
+```
 
 But why would I use the native driver when I have a cool utility lib to play with? Surely Mongoose has some sugar I can use.
 
 The standard save in Mongoose looks like this.
 
-[source,javascript]
-----
+```js
 var coolObject = { _id: 123, aNumericField: 3 };
 var coolDocument = new CoolDocument(coolObject);
 coolDocument.save();
-----
+```
 
 But that won't work because `save` doesn't have the ability to update an existing document, so I'd need to use some clunky find-and-then-save process. I should be able to do better.
 
 Turns out Mongoose provides a `findOneAndUpdate` method on its model objects. That has a promising name and a signature identical to node-mongodb-native's `collection.update`, but unfortunately it has 2 major flaws. The first is that `findOneAndUpdate` totally bypasses schema validation and any other Mongoose middlewear.
 
-[source,javascript]
-----
+```js
 /*
  * No good: Will upsert without forcing schema validation
  */
@@ -75,12 +71,11 @@ model.findOneAndUpdate({ _id: 123 },
 
 // Stored in db:
 // { _id: 123, aNumericField: 'what? a string?' }
-----
+```
 
 Well, I'm not using Mongoose to have all of my lovingly crafted schemas ignored, so that's a pain, but there's more. While `findOneAndUpdate` looks and sounds a lot like `collection.update`, it doesn't act like it. Instead of sending `newObject` to the db for upsert like one might expect, it actually sends `{ $set: newObect }`. This means that it won't totally replace any existing document, it will just update any fields attached to `newObject`. So if I mean to delete some fields by not sending them, I won't be successful. Instead I'll end up with a merged offspring of the old and new documents.
 
-[source,javascript]
-----
+```js
 /*
  * No good: Will merge documents instead of replacing
  */
@@ -101,7 +96,7 @@ model.findOneAndUpdate({ _id: 123 },
 
 // Stored in db:
 // { _id: 123, aNumericField: 14, aStringField: 'cool' }
-----
+```
 
 The Mongoose documentation justifies this behavior with the argument that it prevents you from accidentally overwriting your documents. But what if I want to on purpose overwrite things? how do I do that?
 
@@ -109,8 +104,7 @@ I knew that I didn't want to use `findOneAndUpdate`, because it works differentl
 
 But alas, this results in a new problem. `document.validate` will check each field defined in my schema, but any extra fields will be ignored by validation. This means that unexpected fields get a free ride into the database.
 
-[source,javascript]
-----
+```js
 /*
  * No good: Will allow extra fields
  */
@@ -127,7 +121,7 @@ weirdDocument.validate(function (err) {
 
 // Stored in db:
 // { _id: 123, aNumericField: 14, weirdUnexpectedField: 'Tom Selleck' }
-----
+```
 
 Finally, after many hours of head banging, I discovered the the solution was to:
 
